@@ -2,6 +2,7 @@
 import * as d3 from "d3";
 import fs from "fs";
 import path from "path";
+
 const assetsDir = path.join(process.cwd(), "src", "assets");
 const profText = fs.readFileSync(
   path.join(assetsDir, "professions-culturelles-departements-2017@1.csv"),
@@ -11,9 +12,11 @@ const baseText = fs.readFileSync(
   path.join(assetsDir, "base_culturelle_nettoyee.csv"),
   "utf8"
 );
+
 const parseSemicolon = d3.dsvFormat(";");
 const prof = parseSemicolon.parse(profText.replace(/\uFEFF/g, ""));
 const base = d3.csvParse(baseText);
+
 const normalizeCode = (c: any) => {
   if (c == null) return null;
   let s = String(c).trim().replace(".0", "");
@@ -21,6 +24,7 @@ const normalizeCode = (c: any) => {
   if (/^\d{5}$/.test(s)) s = s.slice(0, 2);
   return s.padStart(2, "0");
 };
+
 const lieuxParDep = d3.rollup(
   base
     .map((d) => ({ dep: normalizeCode(d["N_Département"]) }))
@@ -28,18 +32,21 @@ const lieuxParDep = d3.rollup(
   (v) => v.length,
   (d) => d.dep
 );
+
 const acteursParDep = new Map(
   prof.map((r: any) => [
     normalizeCode(r["Code_insee"]),
     +r["Nombre d'actifs exerçant une profession culturelle_2017"] || 0,
   ])
 );
+
 const nomsParDep = new Map(
   prof.map((r: any) => [
     normalizeCode(r["Code_insee"]),
     r["Libelle_geographique"],
   ])
 );
+
 const fusion = Array.from(
   new Set([...lieuxParDep.keys(), ...acteursParDep.keys()])
 )
@@ -63,14 +70,17 @@ const fusion = Array.from(
   .sort((a, b) =>
     d3.ascending(a.Code_departement ?? "", b.Code_departement ?? "")
   );
+
 const compress = (x: number) => Math.sqrt(Math.log1p(x));
 const dataCompressed = fusion.map((d) => ({
   ...d,
   xComp: compress(d.Nombre_acteurs_culturels),
   yComp: compress(d.Nombre_lieux_culturels),
 }));
+
 const medianActeurs = d3.median(fusion, (d) => d.Nombre_acteurs_culturels) ?? 0;
 const medianLieux = d3.median(fusion, (d) => d.Nombre_lieux_culturels) ?? 0;
+
 function profile(d: any) {
   if (
     d.Nombre_acteurs_culturels >= medianActeurs &&
@@ -89,6 +99,7 @@ function profile(d: any) {
     return "Tension humaine (beaucoup de lieux / peu d'acteurs)";
   return "Potentiel latent (beaucoup d'acteurs / peu de lieux)";
 }
+
 const dataCat = dataCompressed.map((d) => ({ ...d, profil: profile(d) }));
 const dataCatJson = JSON.stringify(dataCat);
 const compressedMedians = JSON.stringify({
@@ -105,27 +116,22 @@ const uniqueId = `graph-8-${Math.random().toString(36).substr(2, 9)}`;
   </div>
   <div class="tooltip"></div>
 </div>
+
 <style>
   .graph-container {
     position: relative;
     display: inline-block;
     width: 100%;
     user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
   }
   .plot-holder {
     user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
   }
   .tooltip {
     display: none;
     position: fixed;
     background: rgba(0, 0, 0, 0.95);
-    color: white;
+    color: #fff;
     padding: 10px 14px;
     border-radius: 6px;
     font-size: 15px;
@@ -141,24 +147,7 @@ const uniqueId = `graph-8-${Math.random().toString(36).substr(2, 9)}`;
     border: 1px solid rgba(255, 255, 255, 0.2);
     z-index: 1000;
   }
-  /* Wrapper du scatter + légende */
-  .scatter-frame {
-    display: block;
-  }
 
-  /* Légende verticale au-dessus, alignée à gauche de la zone utile */
-  .legend-vertical {
-    display: block;
-    margin: 2px 0 8px 0;
-  }
-  .legend-vertical svg {
-    display: block;
-  }
-
-  /* Optionnel: espacement un peu plus dense entre items de légende */
-  .legend-vertical .legend {
-    row-gap: 4px;
-  }
   /* wrapper */
   .scatter-frame {
     display: block;
@@ -185,14 +174,15 @@ const uniqueId = `graph-8-${Math.random().toString(36).substr(2, 9)}`;
     margin-bottom: 6px;
   }
 </style>
+
 <script type="module" define:vars={{ dataCatJson, compressedMedians, uniqueId }}
 >
-  // petit debounce pour éviter de rerendre 30x
+  // debounce simple
   const debounce = (fn, ms = 120) => {
     let t;
-    return (...args) => {
+    return (...a) => {
       clearTimeout(t);
-      t = setTimeout(() => fn(...args), ms);
+      t = setTimeout(() => fn(...a), ms);
     };
   };
 
@@ -213,17 +203,17 @@ const uniqueId = `graph-8-${Math.random().toString(36).substr(2, 9)}`;
       Math.round(holder.getBoundingClientRect().width || 0)
     );
     const isSmall = parentWidth < 640;
-    const plotWidth = parentWidth; // pleine largeur disponible
+    const plotWidth = parentWidth;
     const plotHeight = Math.max(
       420,
       Math.round(plotWidth * (isSmall ? 0.85 : 0.65))
     );
 
     const marginLeft = isSmall ? 56 : 72;
-    const marginTop = 10;
+    const marginTop = 40; // ← AUGMENTÉ pour faire de la place au titre Y
     const fontSize = isSmall ? 11 : 12;
 
-    // Légende verticale (même domaine/couleurs que le plot)
+    // Légende verticale
     const legendDomain = [
       "Écosystème complet",
       "Territoire sous-doté",
@@ -258,14 +248,11 @@ const uniqueId = `graph-8-${Math.random().toString(36).substr(2, 9)}`;
         nice: true,
         ticks: isSmall ? 6 : 8,
         tickFormat: (d) => d.toFixed(1),
+        labelAnchor: "top",
+        labelOffset: 40, // ← AUGMENTÉ pour plus d'espace
       },
-      color: {
-        domain: legendDomain,
-        range: legendRange,
-        legend: false,
-      },
+      color: { domain: legendDomain, range: legendRange, legend: false },
       marks: [
-        // lignes médianes
         Plot.ruleX([medianActeurs], {
           stroke: "#6b7280",
           strokeDasharray: "4,4",
@@ -275,31 +262,6 @@ const uniqueId = `graph-8-${Math.random().toString(36).substr(2, 9)}`;
           strokeDasharray: "4,4",
         }),
 
-        // étiquettes des lignes médianes
-        Plot.text([{ x: medianActeurs, y: "max" }], {
-          frameAnchor: "top-left",
-          dx: 6,
-          dy: 6,
-          text: "Médiane acteurs",
-          fill: "#6b7280",
-          fontSize: fontSize,
-          rotate: 0,
-          x: () => medianActeurs,
-          y: () => Plot.identity,
-        }),
-        Plot.text([{ y: medianLieux, x: "max" }], {
-          frameAnchor: "bottom-right",
-          dx: -6,
-          dy: -6,
-          text: "Médiane lieux",
-          fill: "#6b7280",
-          fontSize: fontSize,
-          rotate: 0,
-          x: () => Plot.identity,
-          y: () => medianLieux,
-        }),
-
-        // points avec halo (pour le contraste sur la grille)
         Plot.dot(dataCat, {
           x: "xComp",
           y: "yComp",
@@ -308,50 +270,15 @@ const uniqueId = `graph-8-${Math.random().toString(36).substr(2, 9)}`;
           stroke: "white",
           strokeWidth: 1.5,
           opacity: 0.95,
-          title: (d) =>
-            `${d.Nom_departement ?? d.Code_departement}
+          title: (d) => `${d.Nom_departement ?? d.Code_departement}
 ${d.Nombre_acteurs_culturels.toLocaleString()} acteurs
 ${d.Nombre_lieux_culturels.toLocaleString()} lieux
 Profil : ${d.profil}`,
         }),
-
-        // labels de quadrants (discrets)
-        Plot.text(
-          [
-            {
-              x: medianActeurs * 0.9,
-              y: medianLieux * 0.9,
-              t: "Territoire sous-doté",
-            },
-            {
-              x: medianActeurs * 1.08,
-              y: medianLieux * 0.9,
-              t: "Potentiel latent",
-            },
-            {
-              x: medianActeurs * 0.9,
-              y: medianLieux * 1.08,
-              t: "Tension humaine",
-            },
-            {
-              x: medianActeurs * 1.08,
-              y: medianLieux * 1.08,
-              t: "Écosystème complet",
-            },
-          ],
-          {
-            x: "x",
-            y: "y",
-            text: "t",
-            fill: "#6b7280",
-            fontSize: fontSize,
-            textAnchor: "start",
-          }
-        ),
       ],
     });
 
-    // Injecte : légende AU-DESSUS, alignée à gauche des axes
+    // Injection : légende au-dessus, moins à droite
     holder.innerHTML = "";
     const frame = document.createElement("div");
     frame.className = "scatter-frame";
@@ -359,14 +286,17 @@ Profil : ${d.profil}`,
 
     const legendRow = document.createElement("div");
     legendRow.className = "legend-vertical";
-    legendRow.style.paddingLeft = marginLeft + "px";
-    legendRow.appendChild(legend);
 
-    // Titre de légende (accessible + cohérent)
+    // PAD réduit pour que la légende soit moins décalée (un peu avant le bord de l'axe)
+    const LEGEND_SHIFT = isSmall ? 10 : 14; // ~ à ajuster si besoin
+    legendRow.style.paddingLeft = Math.max(0, marginLeft - LEGEND_SHIFT) + "px";
+
     const legendTitle = document.createElement("div");
     legendTitle.className = "legend-title";
     legendTitle.textContent = "Profils";
-    legendRow.prepend(legendTitle);
+
+    legendRow.appendChild(legendTitle);
+    legendRow.appendChild(legend);
 
     frame.appendChild(legendRow);
     frame.appendChild(plot);

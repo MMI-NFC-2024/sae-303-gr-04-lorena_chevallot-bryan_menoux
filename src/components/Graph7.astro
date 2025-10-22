@@ -57,24 +57,25 @@ const geojsonJson = JSON.stringify(geojson);
 const scaleParams = JSON.stringify({ min, seuil });
 ---
 
-<div id="map-container-7 !z-1">
-  <div
-    id="map-holder-7"
-    style="height: 650px; width: 850px; border-radius: 12px; margin: 0 auto; z-index: 1"
-  >
-  </div>
+<div id="map-container-7">
+  <div id="map-holder-7"></div>
 </div>
 <style>
   #map-container-7 {
     position: relative;
-    display: inline-block;
+    display: block;
     width: 100%;
+    height: 650px;
   }
   #map-holder-7 {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+    overflow: hidden;
   }
 </style>
 <script type="module" define:vars={{ mergedDataJson, geojsonJson, scaleParams }}
@@ -181,6 +182,12 @@ const scaleParams = JSON.stringify({ min, seuil });
         return div;
       };
       legend.addTo(map);
+
+      // Redimensionner la carte quand la fenêtre change
+      window.addEventListener("resize", () => {
+        map.invalidateSize();
+      });
+
       console.log("Carte Leaflet rendue avec succès");
     } catch (error) {
       console.error("Erreur lors du rendu de la carte 7 :", error);
