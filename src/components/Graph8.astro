@@ -159,14 +159,47 @@ const uniqueId = `graph-8-${Math.random().toString(36).substr(2, 9)}`;
   .legend-vertical .legend {
     row-gap: 4px;
   }
+  /* wrapper */
+  .scatter-frame {
+    display: block;
+  }
+
+  /* Légende verticale au-dessus du graphe */
+  .legend-vertical {
+    display: block;
+    margin: 4px 0 10px 0;
+  }
+  .legend-vertical svg {
+    display: block;
+  }
+  .legend-title {
+    font-weight: 700;
+    font-family:
+      "Red Hat Display",
+      system-ui,
+      -apple-system,
+      sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    color: oklch(22% 0 0);
+    margin-bottom: 6px;
+  }
 </style>
 <script type="module" define:vars={{ dataCatJson, compressedMedians, uniqueId }}
 >
-  async function renderScatterResponsive() {
+  // petit debounce pour éviter de rerendre 30x
+  const debounce = (fn, ms = 120) => {
+    let t;
+    return (...args) => {
+      clearTimeout(t);
+      t = setTimeout(() => fn(...args), ms);
+    };
+  };
+
+  async function renderScatter() {
     const Plot = await import(
       "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm"
     );
-
     const dataCat = JSON.parse(dataCatJson);
     const { medianActeurs, medianLieux } = JSON.parse(compressedMedians);
 
@@ -175,25 +208,22 @@ const uniqueId = `graph-8-${Math.random().toString(36).substr(2, 9)}`;
     const tooltip = container?.querySelector(".tooltip");
     if (!holder || !tooltip) return;
 
-    // Mesure fiable de la largeur disponible
     const parentWidth = Math.max(
       320,
-      Math.floor(holder.getBoundingClientRect().width || 0)
+      Math.round(holder.getBoundingClientRect().width || 0)
     );
-    if (!parentWidth) return; // si layout pas prêt
-
-    // Ratio & marges selon la largeur
     const isSmall = parentWidth < 640;
-    const plotWidth = Math.min(parentWidth, 1100); // un max raisonnable
+    const plotWidth = parentWidth; // pleine largeur disponible
     const plotHeight = Math.max(
       420,
-      Math.round(plotWidth * (isSmall ? 0.8 : 0.65))
+      Math.round(plotWidth * (isSmall ? 0.85 : 0.65))
     );
 
-    const marginLeft = isSmall ? 56 : 70; // un peu plus large en desktop
+    const marginLeft = isSmall ? 56 : 72;
     const marginTop = 10;
+    const fontSize = isSmall ? 11 : 12;
 
-    // Légende (verticale) – couleurs/domaine identiques au plot
+    // Légende verticale (même domaine/couleurs que le plot)
     const legendDomain = [
       "Écosystème complet",
       "Territoire sous-doté",
@@ -204,43 +234,124 @@ const uniqueId = `graph-8-${Math.random().toString(36).substr(2, 9)}`;
 
     const legend = Plot.legend({
       color: { domain: legendDomain, range: legendRange, label: "Profils" },
-      columns: 1, // vertical
+      columns: 1,
       swatchSize: 14,
-      label: "Profils",
-      width: plotWidth - marginLeft, // même bord gauche que la zone utile
+      width: plotWidth - marginLeft,
     });
 
-    // Scatterplot
+    // Scatter
     const plot = Plot.plot({
       width: plotWidth,
       height: plotHeight,
       marginLeft,
       marginTop,
       grid: true,
-      x: { label: "Nombre d'acteurs culturels (compressé) →", nice: true },
-      y: { label: "↑ Nombre de lieux culturels (compressé)", nice: true },
-      color: { domain: legendDomain, range: legendRange, legend: false },
+      style: { fontSize: `${fontSize}px` },
+      x: {
+        label: "Nombre d'acteurs culturels (compressé) →",
+        nice: true,
+        ticks: isSmall ? 6 : 8,
+        tickFormat: (d) => d.toFixed(1),
+      },
+      y: {
+        label: "↑ Nombre de lieux culturels (compressé)",
+        nice: true,
+        ticks: isSmall ? 6 : 8,
+        tickFormat: (d) => d.toFixed(1),
+      },
+      color: {
+        domain: legendDomain,
+        range: legendRange,
+        legend: false,
+      },
       marks: [
-        Plot.ruleX([medianActeurs], { stroke: "#555", strokeDasharray: "4,4" }),
-        Plot.ruleY([medianLieux], { stroke: "#555", strokeDasharray: "4,4" }),
+        // lignes médianes
+        Plot.ruleX([medianActeurs], {
+          stroke: "#6b7280",
+          strokeDasharray: "4,4",
+        }),
+        Plot.ruleY([medianLieux], {
+          stroke: "#6b7280",
+          strokeDasharray: "4,4",
+        }),
+
+        // étiquettes des lignes médianes
+        Plot.text([{ x: medianActeurs, y: "max" }], {
+          frameAnchor: "top-left",
+          dx: 6,
+          dy: 6,
+          text: "Médiane acteurs",
+          fill: "#6b7280",
+          fontSize: fontSize,
+          rotate: 0,
+          x: () => medianActeurs,
+          y: () => Plot.identity,
+        }),
+        Plot.text([{ y: medianLieux, x: "max" }], {
+          frameAnchor: "bottom-right",
+          dx: -6,
+          dy: -6,
+          text: "Médiane lieux",
+          fill: "#6b7280",
+          fontSize: fontSize,
+          rotate: 0,
+          x: () => Plot.identity,
+          y: () => medianLieux,
+        }),
+
+        // points avec halo (pour le contraste sur la grille)
         Plot.dot(dataCat, {
           x: "xComp",
           y: "yComp",
           fill: "profil",
           r: 5,
-          stroke: "#fff",
-          strokeWidth: 1.2,
-          opacity: 0.9,
+          stroke: "white",
+          strokeWidth: 1.5,
+          opacity: 0.95,
           title: (d) =>
             `${d.Nom_departement ?? d.Code_departement}
 ${d.Nombre_acteurs_culturels.toLocaleString()} acteurs
 ${d.Nombre_lieux_culturels.toLocaleString()} lieux
 Profil : ${d.profil}`,
         }),
+
+        // labels de quadrants (discrets)
+        Plot.text(
+          [
+            {
+              x: medianActeurs * 0.9,
+              y: medianLieux * 0.9,
+              t: "Territoire sous-doté",
+            },
+            {
+              x: medianActeurs * 1.08,
+              y: medianLieux * 0.9,
+              t: "Potentiel latent",
+            },
+            {
+              x: medianActeurs * 0.9,
+              y: medianLieux * 1.08,
+              t: "Tension humaine",
+            },
+            {
+              x: medianActeurs * 1.08,
+              y: medianLieux * 1.08,
+              t: "Écosystème complet",
+            },
+          ],
+          {
+            x: "x",
+            y: "y",
+            text: "t",
+            fill: "#6b7280",
+            fontSize: fontSize,
+            textAnchor: "start",
+          }
+        ),
       ],
     });
 
-    // Injection (légende AU-DESSUS, alignée à gauche de la zone utile)
+    // Injecte : légende AU-DESSUS, alignée à gauche des axes
     holder.innerHTML = "";
     const frame = document.createElement("div");
     frame.className = "scatter-frame";
@@ -251,29 +362,34 @@ Profil : ${d.profil}`,
     legendRow.style.paddingLeft = marginLeft + "px";
     legendRow.appendChild(legend);
 
+    // Titre de légende (accessible + cohérent)
+    const legendTitle = document.createElement("div");
+    legendTitle.className = "legend-title";
+    legendTitle.textContent = "Profils";
+    legendRow.prepend(legendTitle);
+
     frame.appendChild(legendRow);
     frame.appendChild(plot);
     holder.appendChild(frame);
 
     // Tooltips
     const dots = holder.querySelectorAll("circle");
-    const dotTitles = new Map();
+    const titles = new Map();
     dots.forEach((dot) => {
       const t = dot.querySelector("title");
-      dotTitles.set(dot, t?.textContent || "");
+      titles.set(dot, t?.textContent || "");
       if (t) t.remove();
       dot.removeAttribute("aria-label");
-
       dot.style.cursor = "pointer";
-      dot.style.transition = "all 0.2s ease";
+      dot.style.transition = "all 0.12s ease";
       dot.addEventListener("mouseenter", (e) => {
-        tooltip.textContent = dotTitles.get(dot);
+        tooltip.textContent = titles.get(dot);
         tooltip.style.display = "block";
         tooltip.style.left = e.clientX + 10 + "px";
         tooltip.style.top = e.clientY + 10 + "px";
         dot.style.r = "8";
         dot.style.strokeWidth = "2";
-        dot.style.filter = "brightness(1.2)";
+        dot.style.filter = "brightness(1.1)";
       });
       dot.addEventListener("mousemove", (e) => {
         tooltip.style.left = e.clientX + 10 + "px";
@@ -282,20 +398,20 @@ Profil : ${d.profil}`,
       dot.addEventListener("mouseleave", () => {
         tooltip.style.display = "none";
         dot.style.r = "5";
-        dot.style.strokeWidth = "1.2";
+        dot.style.strokeWidth = "1.5";
         dot.style.filter = "none";
       });
     });
   }
 
-  // Premier rendu + rerender si redimensionnement
+  // Premier rendu + responsive
   (async () => {
-    await renderScatterResponsive();
+    await renderScatter();
     const container = document.querySelector(`[data-graph-id="${uniqueId}"]`);
     const holder = container?.querySelector(".plot-holder");
     if (!holder) return;
-    const ro = new ResizeObserver(() => renderScatterResponsive());
+    const ro = new ResizeObserver(debounce(renderScatter, 120));
     ro.observe(holder);
-    window.addEventListener("orientationchange", renderScatterResponsive);
+    window.addEventListener("orientationchange", debounce(renderScatter, 120));
   })();
 </script>
