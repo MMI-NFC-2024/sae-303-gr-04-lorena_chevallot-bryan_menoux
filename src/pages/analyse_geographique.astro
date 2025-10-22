@@ -6,6 +6,13 @@ import Graph2 from "../components/Graph2.astro";
 import Graph3 from "../components/Graph3.astro";
 ---
 
+<style>
+  /* Style pour le point blanc quand le lien est actif */
+  .nav-link.btn-primary .nav-dot {
+    background-color: white !important;
+  }
+</style>
+
 <Layout>
   <!-- Section d'intro -->
   <section class="hero min-h-screen bg-base-100">
@@ -74,31 +81,68 @@ import Graph3 from "../components/Graph3.astro";
           et comparez les territoires selon leurs dynamiques culturelles.
         </p>
         <div class="flex gap-4 flex-wrap">
-          <a
-            href="https://www.data.gouv.fr/datasets/base-des-lieux-et-equipements-culturels-basilic/"
-            target="_blank"
-            class="btn btn-secondary hover:btn-primary"
-          >
+          <a href="#densite" class="btn btn-secondary hover:btn-primary">
+            Densité culturelle par département
+          </a>
+          <a href="#carte" class="btn btn-secondary hover:btn-primary">
+            Répartition des lieux par type
+          </a>
+          <a href="#classement" class="btn btn-secondary hover:btn-primary">
             Classement départements
-          </a>
-          <a
-            href="https://www.data.gouv.fr/datasets/collections-des-musees-de-france-base-joconde/"
-            target="_blank"
-            class="btn btn-secondary hover:btn-primary"
-          >
-            Choroplèthe de densité culturelle
-          </a>
-          <a
-            href="https://www.data.gouv.fr/datasets/collections-des-musees-de-france-base-joconde/"
-            target="_blank"
-            class="btn btn-secondary hover:btn-primary"
-          >
-            Répartition des lieux par typologie
           </a>
         </div>
       </div>
     </div>
   </section>
+
+  <!-- Menu latéral de navigation -->
+  <aside
+    class="hidden lg:block fixed left-4 top-1/2 -translate-y-1/2 z-40"
+    id="graphNav"
+  >
+    <div class="card bg-base-200 shadow-xl p-4">
+      <div class="flex flex-col gap-3">
+        <div class="text-xs font-semibold opacity-60 mb-2">Navigation</div>
+        <a
+          href="#densite"
+          class="nav-link btn btn-sm btn-ghost justify-start gap-2 hover:btn-primary"
+          title="Densité culturelle"
+          data-section="densite"
+        >
+          <span class="nav-dot w-2 h-2 rounded-full bg-primary"></span>
+          <span class="text-xs">Densité</span>
+        </a>
+        <a
+          href="#carte"
+          class="nav-link btn btn-sm btn-ghost justify-start gap-2 hover:btn-primary"
+          title="Carte interactive"
+          data-section="carte"
+        >
+          <span class="nav-dot w-2 h-2 rounded-full bg-primary"></span>
+          <span class="text-xs">Carte</span>
+        </a>
+        <a
+          href="#classement"
+          class="nav-link btn btn-sm btn-ghost justify-start gap-2 hover:btn-primary"
+          title="Classement départements"
+          data-section="classement"
+        >
+          <span class="nav-dot w-2 h-2 rounded-full bg-primary"></span>
+          <span class="text-xs">Classement</span>
+        </a>
+        <a
+          href="#conclusion"
+          class="nav-link btn btn-sm btn-ghost justify-start gap-2 hover:btn-primary"
+          title="Conclusion"
+          data-section="conclusion"
+        >
+          <span class="nav-dot w-2 h-2 rounded-full bg-primary"></span>
+          <span class="text-xs">Conclusion</span>
+        </a>
+      </div>
+    </div>
+  </aside>
+
   <!-- Section Analyse : Densité par département -->
   <section id="densite" class="relative py-24 px-6 bg-base-100">
     <div
@@ -175,7 +219,7 @@ import Graph3 from "../components/Graph3.astro";
   </section>
 
   <!-- Section Analyse : Filtrage par type de lieu (musées, bibliothèques, cinémas...) -->
-  <section id="densite" class="relative py-24 px-6 bg-base-100">
+  <section id="carte" class="relative py-24 px-6 bg-base-100">
     <div
       class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
     >
@@ -259,7 +303,7 @@ import Graph3 from "../components/Graph3.astro";
   </section>
 
   <!-- Section Analyse : Classement des 10 départements les mieux et les moins bien dotés en lieux culturels par habitant -->
-  <section id="densite" class="relative py-24 px-6 bg-base-100">
+  <section id="classement" class="relative py-24 px-6 bg-base-100">
     <div
       class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
     >
@@ -337,10 +381,234 @@ import Graph3 from "../components/Graph3.astro";
               class="text-blue-500 hover:text-blue-700 hover:underline transition font-medium"
             >
               Lien vers la base des lieux et équipements culturels
-            </a>
+            </a><br />
+            <a
+              href="https://www.data.gouv.fr/datasets/population"
+              rel="noopener noreferrer"
+              class="text-blue-500 hover:text-blue-700 hover:underline transition font-medium"
+              >Lien vers la base du recensement de la population Française</a
+            >
           </li>
         </ul>
       </aside>
     </div>
   </section>
-</Layout>
+
+  <!-- Section Conclusion -->
+  <section
+    id="conclusion"
+    class="relative py-32 px-6 bg-gradient-to-br from-base-100 via-base-200 to-base-100 overflow-hidden"
+  >
+    <!-- Éléments décoratifs d'arrière-plan -->
+    <div
+      class="absolute top-0 right-0 w-96 h-96 bg-primary opacity-5 rounded-full blur-3xl -mr-48 -mt-48"
+    >
+    </div>
+    <div
+      class="absolute bottom-0 left-0 w-96 h-96 bg-secondary opacity-5 rounded-full blur-3xl -ml-48 -mb-48"
+    >
+    </div>
+
+    <div class="max-w-4xl mx-auto relative z-10">
+      <!-- En-tête -->
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-3 mb-6">
+          <div class="h-1 w-12 bg-primary"></div>
+          <span
+            class="text-sm font-semibold uppercase tracking-widest text-primary"
+            >Conclusion</span
+          >
+          <div class="h-1 w-12 bg-primary"></div>
+        </div>
+        <h2
+          class="text-5xl lg:text-6xl font-bold text-base-content leading-tight"
+        >
+          Une géographie culturelle révélatrice
+        </h2>
+      </div>
+
+      <!-- Contenu principal -->
+      <div class="space-y-8 text-lg leading-relaxed">
+        <p class="text-base-content opacity-90">
+          Ces trois visualisations permettent de dresser un
+          <strong
+            >premier état des lieux de la répartition de l'offre culturelle en
+            France</strong
+          >. La concentration géographique des équipements culturels révèle une
+          inégalité structurelle qui dépasse la simple présence de lieux : c'est
+          un enjeu d'accessibilité réelle.
+        </p>
+
+        <!-- Points clés -->
+        <div class="grid md:grid-cols-2 gap-6">
+          <!-- Point 1 -->
+          <div
+            class="bg-base-300 bg-opacity-50 rounded-xl p-6 border-l-4 border-primary"
+          >
+            <h3
+              class="font-bold text-base-content mb-3 flex items-center gap-2"
+            >
+              <span class="badge badge-primary">1</span>
+              La concentration métropolitaine
+            </h3>
+            <p class="text-sm text-base-content opacity-85">
+              Les équipements culturels se concentrent massivement dans les
+              zones les plus peuplées et touristiques, notamment autour des
+              grandes métropoles (Paris, Lyon, Marseille, Bordeaux) et du
+              littoral. Cette approche à grande échelle met en évidence des
+              contrastes territoriaux majeurs sans entrer dans les détails
+              communaux.
+            </p>
+          </div>
+
+          <!-- Point 2 -->
+          <div
+            class="bg-base-300 bg-opacity-50 rounded-xl p-6 border-l-4 border-primary"
+          >
+            <h3
+              class="font-bold text-base-content mb-3 flex items-center gap-2"
+            >
+              <span class="badge badge-primary">2</span>
+              L'accès dépendant de la proximité urbaine
+            </h3>
+            <p class="text-sm text-base-content opacity-85">
+              Le filtrage par type de lieu (musées, bibliothèques, cinémas)
+              affine l'analyse : une forte densité se concentre autour des
+              grands centres urbains, tandis que les espaces ruraux apparaissent
+              nettement moins dotés. L'accès à la culture reste très dépendant
+              de la proximité avec les grandes villes.
+            </p>
+          </div>
+
+          <!-- Point 3 -->
+          <div
+            class="bg-base-300 bg-opacity-50 rounded-xl p-6 border-l-4 border-accent md:col-span-2"
+          >
+            <h3
+              class="font-bold text-base-content mb-3 flex items-center gap-2"
+            >
+              <span class="badge badge-accent">3</span>
+              Le paradoxe du classement par habitant
+            </h3>
+            <p class="text-sm text-base-content opacity-85">
+              Le classement des départements révèle un paradoxe fondamental :
+              certains territoires ruraux (Cantal, Lot, Lozère) semblent mieux
+              équipés par habitant, mais cette proportion élevée est due à leur
+              faible population. Dans les départements densément peuplés, même
+              avec de nombreux lieux, la pression démographique réduit
+              mécaniquement l'accès individuel et les possibilités d'audience.
+            </p>
+          </div>
+        </div>
+
+        <!-- Synthèse -->
+        <div
+          class="bg-base-300 bg-opacity-50 rounded-2xl p-8 border border-primary/20"
+        >
+          <h3 class="text-2xl font-bold text-base-content mb-4">
+            En résumé : au-delà du nombre de lieux
+          </h3>
+          <p class="text-base-content opacity-90 mb-4">
+            Le nombre de lieux culturels ne garantit pas un accès équitable à la
+            culture. Les grandes villes concentrent l'offre, mais la population
+            y est telle que les équipements deviennent vite insuffisants. À
+            l'inverse, les zones rurales disposent de plus de lieux par
+            habitant, mais leur isolement géographique limite leur accessibilité
+            réelle.
+          </p>
+          <p class="text-base-content opacity-90">
+            Les inégalités culturelles en France ne tiennent pas seulement à la
+            présence de lieux, mais à leur répartition, leur fréquentation et
+            leur capacité à toucher les habitants.
+          </p>
+        </div>
+      </div>
+      <div class="flex justify-center mt-12 pt-8 border-t border-base-300">
+        <a href="/" class="btn btn-primary btn-lg gap-2">
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+            ></path>
+          </svg>
+          Retour au sommaire
+        </a>
+      </div>
+    </div>
+    <!-- Bouton d'action -->
+
+    <script>
+      // Script pour afficher/masquer le menu latéral selon le scroll et gérer la section active
+      document.addEventListener("DOMContentLoaded", () => {
+        const graphNav = document.getElementById("graphNav");
+        const firstSection = document.getElementById("densite");
+        const lastSection = document.getElementById("conclusion");
+        const navLinks = document.querySelectorAll(".nav-link");
+        const sections = ["densite", "carte", "classement", "conclusion"];
+
+        if (graphNav && firstSection && lastSection) {
+          // Masquer initialement
+          graphNav.style.opacity = "0";
+          graphNav.style.pointerEvents = "none";
+          graphNav.style.transition = "opacity 0.3s ease-in-out";
+
+          const updateActiveLink = () => {
+            // Trouver quelle section est visible
+            let activeSection = null;
+            for (const sectionId of sections) {
+              const section = document.getElementById(sectionId);
+              if (section) {
+                const rect = section.getBoundingClientRect();
+                // Section active si son top est proche du haut de la fenêtre
+                if (rect.top <= 200 && rect.bottom > 200) {
+                  activeSection = sectionId;
+                  break;
+                }
+              }
+            }
+
+            // Mettre à jour les styles des liens
+            navLinks.forEach((link) => {
+              const linkSection = link.getAttribute("data-section");
+              if (linkSection === activeSection) {
+                link.classList.remove("btn-ghost");
+                link.classList.add("btn-primary");
+              } else {
+                link.classList.remove("btn-primary");
+                link.classList.add("btn-ghost");
+              }
+            });
+          };
+
+          const checkVisibility = () => {
+            const firstRect = firstSection.getBoundingClientRect();
+            const lastRect = lastSection.getBoundingClientRect();
+
+            // Afficher uniquement si la section densité a commencé (top < viewport)
+            // ET qu'on n'a pas dépassé la dernière section
+            if (firstRect.top <= 100 && lastRect.bottom > 0) {
+              graphNav.style.opacity = "1";
+              graphNav.style.pointerEvents = "auto";
+            } else {
+              graphNav.style.opacity = "0";
+              graphNav.style.pointerEvents = "none";
+            }
+
+            // Mettre à jour le lien actif
+            updateActiveLink();
+          };
+
+          window.addEventListener("scroll", checkVisibility);
+          checkVisibility(); // Vérifier au chargement
+        }
+      });
+    </script>
+  </section></Layout
+>
