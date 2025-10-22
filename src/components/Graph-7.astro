@@ -1,0 +1,190 @@
+---
+import * as d3 from "d3";
+import fs from "fs";
+import path from "path";
+const assetsDir = path.join(process.cwd(), "src", "assets");
+const rawCsv = fs.readFileSync(
+  path.join(assetsDir, "professions-culturelles-departements-2017@1.csv"),
+  "utf8"
+);
+const geoJson = fs.readFileSync(
+  path.join(assetsDir, "departements.geojson"),
+  "utf8"
+);
+const geojson = JSON.parse(geoJson);
+const rows = rawCsv
+  .trim()
+  .split("\n")
+  .map((r) => r.split(";").map((v) => v.trim()));
+const headers = rows[0].map((h) => h.replace(/\uFEFF/g, "").trim());
+const dataCulture = rows
+  .slice(1)
+  .map((r) => Object.fromEntries(r.map((v, i) => [headers[i], v])));
+function getDeptCoordinates(code: string) {
+  const feature = geojson.features.find((f: any) => f.properties.code === code);
+  if (!feature) return { lat: null, lon: null };
+  const coords =
+    feature.geometry.type === "Polygon"
+      ? feature.geometry.coordinates[0]
+      : feature.geometry.coordinates.flat(2);
+  const lon =
+    coords.reduce((sum: number, c: any) => sum + c[0], 0) / coords.length;
+  const lat =
+    coords.reduce((sum: number, c: any) => sum + c[1], 0) / coords.length;
+  return { lat, lon };
+}
+const mergedData = dataCulture
+  .map((row) => {
+    const actifs =
+      +row["Nombre d'actifs exerçant une profession culturelle_2017"];
+    const total = +row["Nombre total d'actifs"];
+    const part = total ? (actifs / total) * 100 : null;
+    return {
+      Libelle_geographique: row["Libelle_geographique"],
+      Code_insee: row["Code_insee"],
+      Actifs_culturels: actifs,
+      Total_actifs: total,
+      Part_culturels: part,
+      ...getDeptCoordinates(row["Code_insee"]),
+    };
+  })
+  .filter((d) => d.lat && d.lon);
+const values = mergedData.map((d) => d.Actifs_culturels).sort((a, b) => b - a);
+const min = values[values.length - 1];
+const seuil = values[1];
+const mergedDataJson = JSON.stringify(mergedData);
+const geojsonJson = JSON.stringify(geojson);
+const scaleParams = JSON.stringify({ min, seuil });
+---
+
+<div id="map-container-7">
+  <div
+    id="map-holder-7"
+    style="height: 650px; width: 850px; border-radius: 12px; margin: 0 auto;"
+  >
+  </div>
+</div>
+<style>
+  #map-container-7 {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+  #map-holder-7 {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+</style>
+<script type="module" define:vars={{ mergedDataJson, geojsonJson, scaleParams }}
+>
+  async function renderMap() {
+    try {
+      const L = await import("https://cdn.jsdelivr.net/npm/leaflet@1.9.4/+esm");
+      const d3 = await import("https://cdn.jsdelivr.net/npm/d3@7/+esm");
+      if (!document.querySelector('link[href*="leaflet.css"]')) {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href =
+          "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css";
+        document.head.appendChild(link);
+      }
+      const mergedData = JSON.parse(mergedDataJson);
+      const geojson = JSON.parse(geojsonJson);
+      const { min, seuil } = JSON.parse(scaleParams);
+      const MIN_RADIUS = 10000;
+      const MAX_RADIUS = 50000;
+      const scale = d3
+        .scalePow()
+        .exponent(2)
+        .domain([min, seuil])
+        .range([MIN_RADIUS, MAX_RADIUS]);
+      function getRadius(value) {
+        return Math.min(scale(value), MAX_RADIUS);
+      }
+      const mapContainer = document.getElementById("map-holder-7");
+      if (!mapContainer) return;
+      const map = L.map(mapContainer, {
+        minZoom: 5,
+        maxZoom: 8,
+        zoomSnap: 0.5,
+      }).setView([46.6, 2.5], 6);
+      L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+        {
+          maxZoom: 8,
+          attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+        }
+      ).addTo(map);
+      L.geoJSON(geojson, {
+        style: { color: "#7e7e7e", weight: 0.8, fillOpacity: 0 },
+      }).addTo(map);
+      mergedData.forEach((d) => {
+        const radius = getRadius(d.Actifs_culturels);
+        const circle = L.circle([d.lat, d.lon], {
+          radius,
+          fillColor: "#2563eb",
+          fillOpacity: 0.35,
+          color: "#1e3a8a",
+          weight: 1,
+        }).addTo(map);
+        circle.bindTooltip(
+          `<strong>${d.Libelle_geographique}</strong><br>${d.Actifs_culturels.toLocaleString()} actifs culturels<br>${d.Part_culturels?.toFixed(2)} % des actifs`,
+          {
+            permanent: false,
+            direction: "top",
+            offset: [0, -10],
+            opacity: 0.95,
+          }
+        );
+        circle.on("mouseover", function () {
+          this.setStyle({
+            fillColor: "#3b82f6",
+            fillOpacity: 0.5,
+            color: "#1e40af",
+            weight: 2,
+          });
+        });
+        circle.on("mouseout", function () {
+          this.setStyle({
+            fillColor: "#2563eb",
+            fillOpacity: 0.35,
+            color: "#1e3a8a",
+            weight: 1,
+          });
+        });
+      });
+      const legend = L.control({ position: "bottomright" });
+      legend.onAdd = function () {
+        const div = L.DomUtil.create("div", "legend");
+        div.style.background = "white";
+        div.style.padding = "12px";
+        div.style.borderRadius = "8px";
+        div.style.fontSize = "13px";
+        div.style.width = "110px";
+        div.style.textAlign = "left";
+        div.innerHTML = `<b>Échelle</b><br>`;
+        const exampleValues = [1000, 10000, 20000];
+        exampleValues.forEach((v) => {
+          const r = getRadius(v) / 1500;
+          div.innerHTML += `<svg width="100" height="${
+            r * 2 + 12
+          }" style="display:block;margin-bottom:4px;"><circle cx="${
+            r + 10
+          }" cy="${r}" r="${r}" fill="#2563eb" fill-opacity="0.35" stroke="#1e3a8a" stroke-width="1"/><text x="${
+            r * 2 + 20
+          }" y="${
+            r + 4
+          }" font-size="11" fill="#333">${v.toLocaleString()}</text></svg>`;
+        });
+        return div;
+      };
+      legend.addTo(map);
+      console.log("Carte Leaflet rendue avec succès");
+    } catch (error) {
+      console.error("Erreur lors du rendu de la carte 7 :", error);
+    }
+  }
+  renderMap();
+</script>
