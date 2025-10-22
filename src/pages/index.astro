@@ -1,38 +1,9 @@
 ---
-import PlotFigure from "../components/PlotFigure.astro";
 import Layout from "../layouts/Layout.astro";
-import * as Plot from "@observablehq/plot";
-import penguins from "../assets/penguins.json";
 import video from "../assets/video_hero.mp4";
 ---
 
 <Layout>
-  <header class="bg-gray-300 shadow-md">
-    <nav class="flex justify-between items-center px-12 py-4">
-      <div class="text-lg font-semibold text-gray-800">
-        <a href="/" class="hover:text-gray-600 transition">Accueil</a>
-      </div>
-
-      <ul class="flex gap-8 text-gray-800">
-        <li>
-          <a href="/analyse" class="hover:text-gray-600 transition font-medium"
-            >Analyse géographique</a
-          >
-        </li>
-        <li>
-          <a href="/acteurs" class="hover:text-gray-600 transition font-medium"
-            >Les acteurs culturels</a
-          >
-        </li>
-        <li>
-          <a href="/acces" class="hover:text-gray-600 transition font-medium"
-            >accès à la culture</a
-          >
-        </li>
-      </ul>
-    </nav>
-  </header>
-
   <section class="w-full bg-black">
     <div class="relative w-full h-screen bg-black overflow-hidden">
       <video class="w-full h-full object-cover" autoplay muted loop>
@@ -40,18 +11,14 @@ import video from "../assets/video_hero.mp4";
       </video>
       <div class="absolute inset-0 bg-black opacity-50"></div>
 
-      <!-- Contenu centré au milieu du hero -->
       <div
         class="absolute inset-0 flex flex-col items-center justify-center text-center px-6 py-20"
       >
-        <!-- Titre -->
         <div class="mb-6">
           <h1 class="text-4xl font-bold text-white leading-tight max-w-4xl">
             La culture, miroir des inégalités
           </h1>
         </div>
-
-        <!-- Sous-titre -->
         <div class="mb-12 max-w-2xl">
           <p class="text-lg text-gray-100 leading-relaxed">
             Explorez les inégalités culturelles des départements français à
@@ -60,30 +27,21 @@ import video from "../assets/video_hero.mp4";
             paysage culturel en France.
           </p>
         </div>
-
-        <!-- 3 Boutons -->
         <div class="flex gap-4 justify-center flex-wrap max-w-3xl">
-          <button
-            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-300 shadow-lg hover:shadow-xl text-sm"
+          <a
+            href="/analyse_geographique"
+            class="btn btn-secondary hover:btn-primary btn-lg"
           >
             Analyse géographique
-          </button>
-          <button
-            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-300 shadow-lg hover:shadow-xl text-sm"
-          >
+          </a>
+          <a href="/acteurs" class="btn btn-secondary hover:btn-primary btn-lg">
             Les acteurs culturels
-          </button>
-          <button
-            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-300 shadow-lg hover:shadow-xl text-sm"
-          >
+          </a>
+          <a href="/acces" class="btn btn-secondary hover:btn-primary btn-lg">
             Accès à la culture
-          </button>
+          </a>
         </div>
       </div>
     </div>
   </section>
-
-  <div class="max-w-7xl mx-auto px-6 py-12">
-    <h1 class="text-2xl font-bold text-gray-800">Bienvenue</h1>
-  </div>
 </Layout>

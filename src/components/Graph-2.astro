@@ -26,7 +26,8 @@ const typesEquipementsJson = JSON.stringify(typesEquipements);
     <label for="type-equipement" class="filter-label"
       >Type d'équipement culturel :</label
     >
-    <select id="type-equipement" class="filter-select">
+    <select id="type-equipement" class="select select-primary">
+      <option disabled selected>Sélectionnez un type d'équipement</option>
       <option value="Musée">Musée</option>
     </select>
   </div>
@@ -148,22 +149,5 @@ const typesEquipementsJson = JSON.stringify(typesEquipements);
     font-weight: 600;
     font-size: 0.95rem;
     color: #374151;
-  }
-  .filter-select {
-    padding: 0.5rem 1rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.375rem;
-    font-size: 0.95rem;
-    background-color: white;
-    cursor: pointer;
-    transition: border-color 0.2s;
-  }
-  .filter-select:hover {
-    border-color: #9ca3af;
-  }
-  .filter-select:focus {
-    outline: none;
-    border-color: #0077b6;
-    box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.1);
   }
 </style>

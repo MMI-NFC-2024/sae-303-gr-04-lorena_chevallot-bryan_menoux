@@ -1,0 +1,94 @@
+---
+import Layout from "../layouts/Layout.astro";
+import photo from "../assets/photo_geographie.jpg";
+---
+
+<Layout>
+  <!-- Section d'intro -->
+  <section class="hero min-h-screen bg-base-100">
+    <div
+      class="hero-content flex-col lg:flex-row gap-12 max-w-7xl h-full flex items-center"
+    >
+      <!-- Texte gauche -->
+      <div class="lg:w-1/2 h-full flex flex-col justify-center">
+        <h1 class="text-5xl font-bold text-base-content">
+          Géographie de l'offre culturelle en France
+        </h1>
+
+        <h2 class="text-2xl font-semibold text-base-content mt-6">
+          Pourquoi cette étape ?
+        </h2>
+
+        <p class="py-4 text-base-content">
+          Avant d'expliquer les écarts, il faut poser un état des lieux clair de
+          la répartition actuelle de l'offre culturelle sur le territoire. Cette
+          première étape consiste à visualiser où se trouvent les équipements
+          culturels (musées, bibliothèques, salles, cinémas, etc.) et à voir
+          s'ils sont équitablement répartis entre les départements.
+        </p>
+        <p class="py-2 text-base-content">
+          Cela nous permet de détecter d'éventuels déséquilibres géographiques
+          et de commencer à identifier les territoires moins bien desservis.
+        </p>
+
+        <!-- Boutons -->
+        <div class="flex flex-wrap gap-4 pt-4">
+          <a
+            href="https://www.data.gouv.fr/datasets/base-des-lieux-et-equipements-culturels-basilic/"
+            target="_blank"
+            class="btn btn-outline btn-primary"
+          >
+            Classement départements
+          </a>
+          <a
+            href="https://www.data.gouv.fr/datasets/collections-des-musees-de-france-base-joconde/"
+            target="_blank"
+            class="btn btn-outline btn-primary"
+          >
+            Base Joconde
+          </a>
+        </div>
+      </div>
+
+      <!-- Image droite -->
+      <div class="card bg-base-200 shadow-xl lg:w-2/3 lg:h-1/2 p-0 rounded-xl">
+        <div
+          class="card-body items-center justify-center h-full p-0 rounded-xl"
+        >
+          <img
+            src={photo.src}
+            alt="Photographie d'un paysage"
+            class="rounded-xl"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Indicateur scroll -->
+    <div
+      class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center"
+    >
+      <p class="text-base-content opacity-40 text-sm mb-2">Faites défiler</p>
+      <div
+        class="w-4 h-4 border-2 border-base-content opacity-40 rounded-full animate-bounce"
+      >
+      </div>
+    </div>
+  </section>
+
+  <!-- Section Exploration - Bloc "Explorer les données" -->
+  <section class="hero bg-neutral text-neutral-content py-20">
+    <div class="hero-content text-center">
+      <div class="max-w-3xl">
+        <h2 class="text-4xl font-bold mb-4">Explorer les données</h2>
+        <p class="text-lg opacity-80 mb-8">
+          Consultez la répartition complète des équipements culturels en France
+          et comparez les territoires selon leurs dynamiques culturelles.
+        </p>
+        <a href="/visualisation" class="btn btn-secondary btn-lg">
+          Voir la carte interactive
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>
