@@ -1,0 +1,202 @@
+---
+import * as d3 from "d3";
+import fs from "fs";
+import path from "path";
+const assetsDir = path.join(process.cwd(), "src", "assets");
+const rawText = fs.readFileSync(
+  path.join(assetsDir, "pratiques_culturelles_2022@1.csv"),
+  "utf8"
+);
+
+const rows = rawText
+  .trim()
+  .split("\n")
+  .map((l) => l.split(","));
+const headers = rows[0];
+const data = rows.slice(1).map((r) => {
+  let i = 0;
+  while (i < r.length && isNaN(+r[i])) i++;
+  const activite = r.slice(0, i).join(",").trim();
+  const values = r.slice(i).map((v) => +v);
+  const obj: any = { Pratique: activite };
+  headers.slice(-values.length).forEach((h, j) => (obj[h.trim()] = values[j]));
+  return obj;
+});
+const tidy: any[] = [];
+for (const row of data) {
+  for (const [key, value] of Object.entries(row)) {
+    const numValue = typeof value === "number" ? value : NaN;
+    if (key === "Pratique" || isNaN(numValue)) continue;
+    tidy.push({
+      Activité: row["Pratique"],
+      Catégorie: key.trim(),
+      Valeur: numValue,
+    });
+  }
+}
+const tidyJson = JSON.stringify(tidy);
+---
+
+<div id="map-container-6">
+  <div
+    id="plot-holder-6"
+    class="flex justify-center min-h-[400px] items-center"
+  >
+    <div class="text-zinc-400">Chargement du graphique...</div>
+  </div>
+  <div id="tooltip-6" class="tooltip"></div>
+</div>
+<style>
+  #map-container-6 {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  #plot-holder-6 {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  #plot-holder-6 svg {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  #plot-holder-6 text {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  .tooltip {
+    display: none;
+    position: fixed;
+    background: rgba(0, 0, 0, 0.95);
+    color: white;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+    white-space: pre-line;
+    line-height: 1.6;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 1000;
+  }
+</style>
+<script type="module" define:vars={{ tidyJson }}>
+  const tidy = JSON.parse(tidyJson);
+  async function renderPlot() {
+    try {
+      const Plot = await import(
+        "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm"
+      );
+      const d3 = await import("https://cdn.jsdelivr.net/npm/d3@7/+esm");
+      const maxValue = d3.max(tidy, (d) => d.Valeur);
+      const heatmap = Plot.plot({
+        marginLeft: 190,
+        marginBottom: 120,
+        color: {
+          scheme: "YlGnBu",
+          label: "Taux (%)",
+          legend: true,
+          domain: [0, maxValue],
+        },
+        x: {
+          label: "Catégorie socioprofessionnelle",
+          tickRotate: -45,
+        },
+        y: {
+          label: null,
+          domain: tidy.map((d) => d.Activité).reverse(),
+        },
+        marks: [
+          Plot.cell(tidy, {
+            x: "Catégorie",
+            y: "Activité",
+            fill: "Valeur",
+            stroke: "#fff",
+            title: (d) =>
+              `${d.Catégorie}\n${d.Activité} : ${d.Valeur.toFixed(1)} %`,
+          }),
+          Plot.text(tidy, {
+            x: "Catégorie",
+            y: "Activité",
+            text: (d) => `${d.Valeur.toFixed(1)} %`,
+            fill: (d) => (d.Valeur > maxValue * 0.5 ? "white" : "black"),
+            fontSize: 11,
+          }),
+        ],
+        width: 750,
+        height: 400,
+      });
+      const plotHolder = document.getElementById("plot-holder-6");
+      const tooltip = document.getElementById("tooltip-6");
+      if (plotHolder && tooltip) {
+        plotHolder.innerHTML = "";
+        plotHolder.appendChild(heatmap);
+        const cells = plotHolder.querySelectorAll("rect");
+        const cellTitles = new Map();
+        cells.forEach((cell) => {
+          const titleElement = cell.querySelector("title");
+          const title = titleElement?.textContent || "";
+          cellTitles.set(cell, title);
+          if (titleElement) {
+            titleElement.remove();
+          }
+          cell.removeAttribute("aria-label");
+        });
+        let currentHighlightedCell = null;
+        cells.forEach((cell) => {
+          cell.style.cursor = "pointer";
+          cell.style.transition = "all 0.2s ease";
+          cell.style.pointerEvents = "all";
+          cell.addEventListener("mouseenter", (e) => {
+            const title = cellTitles.get(cell);
+            tooltip.textContent = title;
+            tooltip.style.display = "block";
+            tooltip.style.left = e.pageX + 10 + "px";
+            tooltip.style.top = e.pageY + 10 + "px";
+            currentHighlightedCell = cell;
+            cell.style.stroke = "#2563eb";
+            cell.style.filter = "brightness(1.15) saturate(1.2)";
+            cell.style.opacity = "0.9";
+          });
+          cell.addEventListener("mousemove", (e) => {
+            tooltip.style.left = e.pageX + 10 + "px";
+            tooltip.style.top = e.pageY + 10 + "px";
+          });
+          cell.addEventListener("mouseleave", (e) => {
+            const relatedTarget = e.relatedTarget;
+            if (!relatedTarget || relatedTarget.tagName !== "text") {
+              tooltip.style.display = "none";
+              currentHighlightedCell = null;
+              cell.style.stroke = "#fff";
+              cell.style.filter = "none";
+              cell.style.opacity = "1";
+            }
+          });
+        });
+        const texts = plotHolder.querySelectorAll("text");
+        texts.forEach((text) => {
+          text.style.cursor = "pointer";
+          text.style.pointerEvents = "none";
+        });
+      }
+    } catch (error) {
+      console.error("Erreur lors du rendu du graphique 6 :", error);
+    }
+  }
+  renderPlot();
+</script>
