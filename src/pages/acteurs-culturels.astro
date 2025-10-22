@@ -1,7 +1,632 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import photo from "../assets/photo_geographie.jpg";
+import photo from "../assets/photo_acteurs.jpg";
 import Graph4 from "../components/Graph4.astro";
 import Graph5 from "../components/Graph5.astro";
 import Graph6 from "../components/Graph6.astro";
 ---
+
+<style>
+  /* Style pour le point blanc quand le lien est actif */
+  .nav-link.btn-primary .nav-dot {
+    background-color: white !important;
+  }
+</style>
+
+<Layout>
+  <!-- Section d'intro -->
+  <section class="hero min-h-screen bg-base-100">
+    <div
+      class="hero-content flex-col lg:flex-row gap-12 max-w-7xl flex items-center justify-center"
+    >
+      <!-- Texte gauche -->
+      <div class="lg:w-1/2 flex flex-col justify-center">
+        <h1 class="text-5xl font-bold text-base-content">
+          Revenu, statut social et usages culturels
+        </h1>
+
+        <h2 class="text-2xl font-semibold text-base-content mt-6">
+          Pourquoi cette étape ?
+        </h2>
+
+        <p class="py-4 text-base-content">
+          Après avoir observé où se trouvent les lieux culturels, on cherche
+          maintenant à comprendre pourquoi ils s’y trouvent et comment ils sont
+          utilisés. Cette étape explore l’idée que le pouvoir d’achat et la
+          situation sociale des habitants jouent un rôle central dans l’activité
+          culturelle locale. L’objectif est de voir s’il existe un lien entre le
+          revenu des ménages et la fréquentation culturelle d’un territoire.
+        </p>
+        <p class="py-2 text-base-content">
+          En complément, nous représentons l’écart de fréquentation selon la
+          catégorie socioprofessionnelle. Ces visualisations montrent que les
+          inégalités économiques et sociales se traduisent directement dans les
+          pratiques culturelles : l’inégalité culturelle ne dépend pas seulement
+          de la présence d’une offre, mais aussi de la capacité des individus à
+          la mobiliser.
+        </p>
+
+        <!-- Boutons -->
+        <div class="flex flex-wrap gap-4 pt-4"></div>
+      </div>
+
+      <!-- Image droite -->
+      <div class="card bg-base-200 shadow-xl lg:w-2/3 p-0 rounded-xl">
+        <div
+          class="card-body items-center justify-center h-full p-0 rounded-xl"
+        >
+          <img
+            src={photo.src}
+            alt="Photographie d'un paysage"
+            class="rounded-xl w-full object-cover"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Indicateur scroll -->
+    <div
+      class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center"
+    >
+      <p class="text-base-content opacity-40 text-sm mb-2">Faites défiler</p>
+      <div
+        class="w-4 h-4 border-2 border-base-content opacity-40 rounded-full animate-bounce"
+      >
+      </div>
+    </div>
+  </section>
+
+  <!-- Section Exploration - Bloc "Explorer les données" -->
+  <section class="hero bg-neutral text-neutral-content py-20">
+    <div class="hero-content text-center">
+      <div class="max-w-3xl flex flex-col items-center">
+        <h2 class="text-4xl font-bold mb-4">Explorer les données</h2>
+        <p class="text-lg opacity-80 mb-8">
+          Consultez la relation entre conditions économiques et usages
+          culturels, et comparez les territoires selon leurs dynamiques
+          sociales.
+        </p>
+        <div class="flex gap-4 flex-wrap">
+          <a href="#densite" class="btn btn-secondary hover:btn-primary">
+            Corrélation revenu & musées
+          </a>
+          <a href="#carte" class="btn btn-secondary hover:btn-primary">
+            Cartes pauvreté vs musées
+          </a>
+          <a href="#classement" class="btn btn-secondary hover:btn-primary">
+            Cinéma par catégorie socioprofessionnelle
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Menu latéral de navigation -->
+  <aside
+    class="hidden lg:block fixed left-4 top-1/2 -translate-y-1/2 z-40"
+    id="graphNav"
+  >
+    <div class="card bg-base-200 shadow-xl p-4">
+      <div class="flex flex-col gap-3">
+        <div class="text-xs font-semibold opacity-60 mb-2">Navigation</div>
+        <a
+          href="#densite"
+          class="nav-link btn btn-sm btn-ghost justify-start gap-2 hover:btn-primary"
+          title="Corrélation revenu & musées"
+          data-section="densite"
+        >
+          <span class="nav-dot w-2 h-2 rounded-full bg-primary"></span>
+          <span class="text-xs">Corrélation</span>
+        </a>
+        <a
+          href="#carte"
+          class="nav-link btn btn-sm btn-ghost justify-start gap-2 hover:btn-primary"
+          title="Cartes pauvreté vs musées"
+          data-section="carte"
+        >
+          <span class="nav-dot w-2 h-2 rounded-full bg-primary"></span>
+          <span class="text-xs">Cartes</span>
+        </a>
+        <a
+          href="#classement"
+          class="nav-link btn btn-sm btn-ghost justify-start gap-2 hover:btn-primary"
+          title="Cinéma & CSP"
+          data-section="classement"
+        >
+          <span class="nav-dot w-2 h-2 rounded-full bg-primary"></span>
+          <span class="text-xs">Cinéma & CSP</span>
+        </a>
+        <a
+          href="#conclusion"
+          class="nav-link btn btn-sm btn-ghost justify-start gap-2 hover:btn-primary"
+          title="Conclusion"
+          data-section="conclusion"
+        >
+          <span class="nav-dot w-2 h-2 rounded-full bg-primary"></span>
+          <span class="text-xs">Conclusion</span>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Section Analyse : Graph1 (corrélation revenu / musées) -->
+  <section id="densite" class="relative py-24 px-6 bg-base-100">
+    <div
+      class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
+    >
+      <!-- Graphique à gauche -->
+      <div class="relative">
+        <div
+          class="relative card bg-base-200 shadow-xl rounded-2xl overflow-hidden"
+        >
+          <div
+            class="p-4 border-b border-base-300 flex items-center justify-between"
+          >
+            <span class="badge badge-primary badge-lg">Graphique</span>
+            <div class="join">
+              <span class="join-item badge">France</span>
+              <span class="join-item badge">Départements</span>
+            </div>
+          </div>
+          <div class="p-4">
+            <Graph4 />
+          </div>
+        </div>
+      </div>
+
+      <!-- Explication à droite -->
+      <aside class="space-y-6 lg:sticky gap-6 lg:top-24">
+        <div class="inline-flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-secondary"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-secondary"></div>
+          <span class="text-sm opacity-60">Étape 1 — Revenu & usages</span>
+        </div>
+
+        <h3 class="text-3xl font-bold">
+          Corrélation entre revenu médian et activité culturelle autour des
+          musées (2021)
+        </h3>
+
+        <h4 class="text-1xl font-medium">Ce que l’on voit</h4>
+        <p class="leading-relaxed">
+          Chaque point représente un département. La tendance générale indique
+          que plus un territoire est touché par la pauvreté, moins ses habitants
+          fréquentent les musées. La ligne de tendance (et sa zone
+          d’incertitude) met en évidence cette relation négative entre précarité
+          économique et pratiques muséales.
+        </p>
+
+        <h4 class="text-1xl font-medium">Comment l’interpréter</h4>
+        <p class="leading-relaxed">
+          Cette corrélation montre que l’inégalité culturelle ne tient pas qu’au
+          nombre de lieux disponibles : la capacité des habitants à y accéder
+          (revenus, arbitrages de dépenses, contraintes matérielles) pèse
+          fortement. Pour une lecture robuste, croiser avec des indicateurs par
+          habitant, des temps d’accès et la structure démographique des
+          territoires.
+        </p>
+
+        <div class="divider my-2">Bases de données utilisées</div>
+        <ul class="space-y-3">
+          <li>
+            <a
+              href="https://www.data.gouv.fr/datasets/frequentation-des-musees-de-france-1/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-500 hover:text-blue-700 hover:underline transition font-medium"
+            >
+              Fréquentation des musées de France (2021)
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://www.insee.fr/fr/statistiques/7941411?sommaire=7941491"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-500 hover:text-blue-700 hover:underline transition font-medium"
+            >
+              INSEE — Niveau de vie et pauvreté par région et département
+            </a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Section Analyse : Graph2 (cartes pauvreté vs musées) -->
+  <section id="carte" class="relative py-24 px-6 bg-base-100">
+    <div
+      class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
+    >
+      <!-- Graphique à gauche -->
+      <div class="relative">
+        <div
+          class="absolute -inset-2 rounded-2xl bg-gradient-to-br from-base-300 to-base-200 opacity-60 blur-md"
+        >
+        </div>
+        <div
+          class="relative card bg-base-200 shadow-xl rounded-2xl overflow-hidden"
+        >
+          <div
+            class="p-4 border-b border-base-300 flex items-center justify-between"
+          >
+            <span class="badge badge-primary badge-lg">Graphique</span>
+            <div class="join">
+              <span class="join-item badge">France</span>
+              <span class="join-item badge">Départements</span>
+            </div>
+          </div>
+          <div class="p-4">
+            <Graph5 />
+          </div>
+        </div>
+      </div>
+
+      <!-- Explication à droite -->
+      <aside class="space-y-6 lg:sticky gap-6 lg:top-24">
+        <div class="inline-flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full bg-secondary"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-secondary"></div>
+          <span class="text-sm opacity-60">Étape 2 — Revenu & usages</span>
+        </div>
+
+        <h3 class="text-3xl font-bold">
+          Comparaison cartographique : pauvreté vs fréquentation des musées
+          (2021)
+        </h3>
+
+        <h4 class="text-1xl font-medium">Ce que l’on voit</h4>
+        <p class="leading-relaxed">
+          La double carte juxtapose le taux de pauvreté (du clair au rouge
+          foncé) et la part estimée de la population ayant visité un musée (du
+          clair au bleu foncé). Visuellement, les zones les plus pauvres
+          correspondent souvent à une fréquentation plus faible des musées.
+        </p>
+
+        <h4 class="text-1xl font-medium">Comment l’interpréter</h4>
+        <p class="leading-relaxed">
+          Cette lecture géographique rend les écarts immédiatement lisibles,
+          mais ne dit pas tout des réalités locales : offre réellement
+          accessible, réseaux de transport, distances intra-départementales et
+          profils de population. À utiliser comme repérage macro pour cibler des
+          diagnostics plus fins à l’échelle intercommunale.
+        </p>
+
+        <div class="divider my-2">Bases de données utilisées</div>
+        <ul class="space-y-3">
+          <li>
+            <a
+              href="https://france-geojson.gregoiredavid.fr/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-500 hover:text-blue-700 hover:underline transition font-medium"
+            >
+              Géométries des départements (GeoJSON)
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://www.data.gouv.fr/datasets/frequentation-des-musees-de-france-1/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-500 hover:text-blue-700 hover:underline transition font-medium"
+            >
+              Fréquentation des musées de France (2021)
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://www.insee.fr/fr/statistiques/7941411?sommaire=7941491"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-500 hover:text-blue-700 hover:underline transition font-medium"
+            >
+              INSEE — Niveau de vie et pauvreté par région et département
+            </a>
+          </li>
+          <li>
+            <a
+              href="https://www.data.gouv.fr/datasets/population"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-500 hover:text-blue-700 hover:underline transition font-medium"
+            >
+              Recensement de la population française
+            </a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Section Analyse : Graph3 (cinéma par CSP) -->
+  <section id="classement" class="relative py-24 px-6 bg-base-100">
+    <div
+      class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
+    >
+      <!-- Graphique à gauche -->
+      <div class="relative">
+        <div
+          class="absolute -inset-2 rounded-2xl bg-gradient-to-br from-base-300 to-base-200 opacity-60 blur-md"
+        >
+        </div>
+        <div
+          class="relative card bg-base-200 shadow-xl rounded-2xl overflow-hidden"
+        >
+          <div
+            class="p-4 border-b border-base-300 flex items-center justify-between"
+          >
+            <span class="badge badge-primary badge-lg">Graphique</span>
+            <div class="join">
+              <span class="join-item badge">France</span>
+              <span class="join-item badge">CSP</span>
+            </div>
+          </div>
+          <div class="p-4">
+            <Graph6 />
+          </div>
+        </div>
+      </div>
+
+      <!-- Explication à droite -->
+      <aside class="space-y-6 lg:sticky gap-6 lg:top-24">
+        <div class="inline-flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full bg-secondary"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-secondary"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+          <span class="text-sm opacity-60">Étape 3 — Revenu & usages</span>
+        </div>
+
+        <h3 class="text-3xl font-bold">
+          Fréquentation des cinémas selon la catégorie socioprofessionnelle
+          (2022)
+        </h3>
+
+        <h4 class="text-1xl font-medium">Ce que l’on voit</h4>
+        <p class="leading-relaxed">
+          La heatmap croise réponses et catégories socioprofessionnelles. Les
+          cadres et professions intermédiaires sont les plus nombreux à aller au
+          cinéma, tandis que les ouvriers et les retraités y vont nettement
+          moins souvent. Les raisons financières et le manque d’intérêt sont
+          plus fréquemment invoqués par les catégories modestes.
+        </p>
+
+        <h4 class="text-1xl font-medium">Comment l’interpréter</h4>
+        <p class="leading-relaxed">
+          Au-delà de la présence d’équipements, l’accès dépend des conditions
+          économiques, sociales et symboliques des individus. Le graphique met
+          en évidence une fracture sociale de pratiques : pouvoir d’achat,
+          normes culturelles et contraintes de temps influencent la
+          participation. À rapprocher des politiques tarifaires, de l’offre
+          locale et des actions d’éducation artistique et culturelle.
+        </p>
+
+        <div class="divider my-2">Bases de données utilisées</div>
+        <ul class="space-y-3">
+          <li>
+            <a
+              href="https://www.insee.fr/fr/statistiques/7666877?sommaire=7666953"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-500 hover:text-blue-700 hover:underline transition font-medium"
+            >
+              INSEE — Pratiques culturelles selon la catégorie
+              socioprofessionnelle
+            </a>
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Section Conclusion -->
+  <section
+    id="conclusion"
+    class="relative py-32 px-6 bg-gradient-to-br from-base-100 via-base-200 to-base-100 overflow-hidden"
+  >
+    <!-- Éléments décoratifs d'arrière-plan -->
+    <div
+      class="absolute top-0 right-0 w-96 h-96 bg-primary opacity-5 rounded-full blur-3xl -mr-48 -mt-48"
+    >
+    </div>
+    <div
+      class="absolute bottom-0 left-0 w-96 h-96 bg-secondary opacity-5 rounded-full blur-3xl -ml-48 -mb-48"
+    >
+    </div>
+
+    <div class="max-w-4xl mx-auto relative z-10">
+      <!-- En-tête -->
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-3 mb-6">
+          <div class="h-1 w-12 bg-primary"></div>
+          <span
+            class="text-sm font-semibold uppercase tracking-widest text-primary"
+            >Conclusion</span
+          >
+          <div class="h-1 w-12 bg-primary"></div>
+        </div>
+        <h2
+          class="text-5xl lg:text-6xl font-bold text-base-content leading-tight"
+        >
+          Inégalités sociales et accès à la culture
+        </h2>
+      </div>
+
+      <!-- Contenu principal -->
+      <div class="space-y-8 text-lg leading-relaxed">
+        <p class="text-base-content opacity-90">
+          Ces trois visualisations montrent une tendance nette : les inégalités
+          économiques et sociales influencent directement l’accès à la culture.
+          Plus un territoire est touché par la précarité, plus la fréquentation
+          des musées est faible, et les écarts se lisent clairement dans
+          l’espace. Les différences de pratiques entre catégories
+          socioprofessionnelles confirment que l’offre seule ne suffit pas : la
+          capacité à la mobiliser dépend des conditions de vie.
+        </p>
+
+        <!-- Points clés -->
+        <div class="grid md:grid-cols-2 gap-6">
+          <!-- Point 1 -->
+          <div
+            class="bg-base-300 bg-opacity-50 rounded-xl p-6 border-l-4 border-primary"
+          >
+            <h3
+              class="font-bold text-base-content mb-3 flex items-center gap-2"
+            >
+              <span class="badge badge-primary">1</span>
+              Corrélation pauvreté / pratiques
+            </h3>
+            <p class="text-sm text-base-content opacity-85">
+              La relation négative entre pauvreté et visites de musées met en
+              évidence un frein économique réel à la participation culturelle.
+            </p>
+          </div>
+
+          <!-- Point 2 -->
+          <div
+            class="bg-base-300 bg-opacity-50 rounded-xl p-6 border-l-4 border-primary"
+          >
+            <h3
+              class="font-bold text-base-content mb-3 flex items-center gap-2"
+            >
+              <span class="badge badge-primary">2</span>
+              Écarts géographiques visibles
+            </h3>
+            <p class="text-sm text-base-content opacity-85">
+              Les cartes montrent que les zones les plus pauvres sont souvent
+              celles où l’activité muséale est la plus faible, appelant des
+              actions ciblées à l’échelle locale.
+            </p>
+          </div>
+
+          <!-- Point 3 -->
+          <div
+            class="bg-base-300 bg-opacity-50 rounded-xl p-6 border-l-4 border-accent md:col-span-2"
+          >
+            <h3
+              class="font-bold text-base-content mb-3 flex items-center gap-2"
+            >
+              <span class="badge badge-accent">3</span>
+              Fracture sociale des pratiques
+            </h3>
+            <p class="text-sm text-base-content opacity-85">
+              Les cadres et professions intermédiaires participent davantage que
+              les ouvriers et les retraités. Les politiques culturelles
+              inclusives doivent intégrer tarifs, mobilité, médiation et
+              éducation artistique et culturelle.
+            </p>
+          </div>
+        </div>
+
+        <!-- Synthèse -->
+        <div
+          class="bg-base-300 bg-opacity-50 rounded-2xl p-8 border border-primary/20"
+        >
+          <h3 class="text-2xl font-bold text-base-content mb-4">
+            En résumé : au-delà du nombre de lieux
+          </h3>
+          <p class="text-base-content opacity-90 mb-4">
+            L’accès à la culture ne dépend pas seulement de l’inventaire des
+            équipements. Il résulte d’un faisceau de facteurs : pouvoir d’achat,
+            proximité et transport, horaires, médiation, habitudes et capital
+            culturel. Agir sur ces leviers est indispensable pour réduire les
+            écarts de participation.
+          </p>
+          <p class="text-base-content opacity-90">
+            Une politique culturelle plus inclusive doit tenir compte des
+            inégalités structurelles qui empêchent certaines populations de
+            bénéficier pleinement de l’offre existante.
+          </p>
+        </div>
+      </div>
+      <div class="flex justify-center mt-12 pt-8 border-t border-base-300">
+        <a href="/" class="btn btn-primary btn-lg gap-2">
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+            ></path>
+          </svg>
+          Retour au sommaire
+        </a>
+      </div>
+    </div>
+    <!-- Bouton d'action -->
+
+    <script>
+      // Script pour afficher/masquer le menu latéral selon le scroll et gérer la section active
+      document.addEventListener("DOMContentLoaded", () => {
+        const graphNav = document.getElementById("graphNav");
+        const firstSection = document.getElementById("densite");
+        const lastSection = document.getElementById("conclusion");
+        const navLinks = document.querySelectorAll(".nav-link");
+        const sections = ["densite", "carte", "classement", "conclusion"];
+
+        if (graphNav && firstSection && lastSection) {
+          // Masquer initialement
+          graphNav.style.opacity = "0";
+          graphNav.style.pointerEvents = "none";
+          graphNav.style.transition = "opacity 0.3s ease-in-out";
+
+          const updateActiveLink = () => {
+            // Trouver quelle section est visible
+            let activeSection = null;
+            for (const sectionId of sections) {
+              const section = document.getElementById(sectionId);
+              if (section) {
+                const rect = section.getBoundingClientRect();
+                // Section active si son top est proche du haut de la fenêtre
+                if (rect.top <= 200 && rect.bottom > 200) {
+                  activeSection = sectionId;
+                  break;
+                }
+              }
+            }
+
+            // Mettre à jour les styles des liens
+            navLinks.forEach((link) => {
+              const linkSection = link.getAttribute("data-section");
+              if (linkSection === activeSection) {
+                link.classList.remove("btn-ghost");
+                link.classList.add("btn-primary");
+              } else {
+                link.classList.remove("btn-primary");
+                link.classList.add("btn-ghost");
+              }
+            });
+          };
+
+          const checkVisibility = () => {
+            const firstRect = firstSection.getBoundingClientRect();
+            const lastRect = lastSection.getBoundingClientRect();
+
+            // Afficher uniquement si la section densité a commencé (top < viewport)
+            // ET qu'on n'a pas dépassé la dernière section
+            if (firstRect.top <= 100 && lastRect.bottom > 0) {
+              graphNav.style.opacity = "1";
+              graphNav.style.pointerEvents = "auto";
+            } else {
+              graphNav.style.opacity = "0";
+              graphNav.style.pointerEvents = "none";
+            }
+
+            // Mettre à jour le lien actif
+            updateActiveLink();
+          };
+
+          window.addEventListener("scroll", checkVisibility);
+          checkVisibility(); // Vérifier au chargement
+        }
+      });
+    </script>
+  </section>
+</Layout>

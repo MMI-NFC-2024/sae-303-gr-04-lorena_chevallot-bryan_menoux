@@ -2,27 +2,35 @@
 import * as d3 from "d3";
 import fs from "fs";
 import path from "path";
+
 const assetsDir = path.join(process.cwd(), "src", "assets");
+
+// Données
 const entreesMuseeText = fs.readFileSync(
   path.join(assetsDir, "ENTREES_ET_CATEGORIES_DE_PUBLIC@2.csv"),
   "utf8"
 );
 const musees = d3.csvParse(entreesMuseeText);
+
 const indicePauvreteText = fs.readFileSync(
   path.join(assetsDir, "indice-pauvrete-21@1.csv"),
   "utf8"
 );
 const indicePauvrete = d3.csvParse(indicePauvreteText);
+
 const populationText = fs.readFileSync(
   path.join(assetsDir, "detail_population@2.json"),
   "utf8"
 );
 const population = JSON.parse(populationText);
+
 const geoText = fs.readFileSync(
   path.join(assetsDir, "departements.geojson"),
   "utf8"
 );
 const france = JSON.parse(geoText);
+
+// Utils
 const normalizeCode = (code: any) => {
   if (code == null) return null;
   let c = String(code).trim().replace(".0", "");
@@ -32,6 +40,8 @@ const normalizeCode = (code: any) => {
 };
 const altCorse = (code: string) =>
   code === "2A" || code === "2B" ? "20" : code;
+
+// Prépa population
 const populationFiltre = population.filter(
   (d: any) =>
     d["Niveau Géo"] === "Département" &&
@@ -53,12 +63,16 @@ const popMap = new Map(
     return [code, val || null];
   }).filter(Boolean) as any
 );
+
+// Prépa pauvreté
 const pauvMap = new Map(
   indicePauvrete.map((d: any) => [
     normalizeCode(d.code_departement),
     +d.taux_pauvrete,
   ])
 );
+
+// Prépa musées
 const museeMap = new Map();
 musees.forEach((d: any) => {
   const code = normalizeCode(d.code_departement);
@@ -68,6 +82,8 @@ musees.forEach((d: any) => {
   const total = payant + gratuit;
   museeMap.set(code, (museeMap.get(code) || 0) + total);
 });
+
+// Merge
 const dataFinale = france.features.map((f: any) => {
   const code = normalizeCode(f.properties.code);
   const pop = code
@@ -92,17 +108,18 @@ france.features.forEach((f: any) => {
   f.properties.taux_pauvrete = d?.pauvrete ?? null;
   f.properties.pourcentage_visites = d?.pourcentage ?? null;
 });
-const franceJson = JSON.stringify(france);
 
+const franceJson = JSON.stringify(france);
 const uniqueId = `graph-5-${Math.random().toString(36).substr(2, 9)}`;
 ---
 
 <div class="graph-container" data-graph-id={uniqueId}>
-  <div class="plot-holder flex justify-center min-h-[540px] items-center">
-    <div class="text-zinc-400">Chargement des cartes...</div>
+  <div class="plot-holder grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+    <div class="text-zinc-400 col-span-full">Chargement des cartes...</div>
   </div>
   <div class="tooltip"></div>
 </div>
+
 <script type="module" define:vars={{ franceJson, uniqueId }}>
   (async () => {
     const Plot = await import(
@@ -113,85 +130,38 @@ const uniqueId = `graph-5-${Math.random().toString(36).substr(2, 9)}`;
     const container = document.querySelector(`[data-graph-id="${uniqueId}"]`);
     const plotHolder = container?.querySelector(".plot-holder");
     const tooltip = container?.querySelector(".tooltip");
+    if (!plotHolder) return;
 
-    try {
-      const width = 460;
-      const height = 540;
-      const mapPauvrete = Plot.plot({
-        title: "Taux de pauvreté (%) par département",
-        projection: { type: "mercator", domain: france },
-        color: { scheme: "Reds", label: "Taux de pauvreté (%)" },
-        marks: [
-          Plot.geo(france, {
-            fill: (d) => d.properties.taux_pauvrete,
-            stroke: "#fff",
-            title: (d) =>
-              `${d.properties.nom}\n${
-                d.properties.taux_pauvrete != null
-                  ? d.properties.taux_pauvrete + " %"
-                  : "Aucune donnée"
-              }`,
-            ariaLabel: null,
-          }),
-        ],
-        width,
-        height,
-        margin: 0,
-      });
-      const mapCulture = Plot.plot({
-        title: "Part estimée de la population ayant visité un musée (%)",
-        projection: { type: "mercator", domain: france },
-        color: {
-          scheme: "YlGnBu",
-          label: "% d'habitants",
-          domain: [0, 100],
-        },
-        marks: [
-          Plot.geo(france, {
-            fill: (d) => {
-              const v = d.properties.pourcentage_visites;
-              return v == null ? 0 : Math.max(0, Math.min(100, v));
-            },
-            stroke: "#fff",
-            title: (d) =>
-              `${d.properties.nom}\n${
-                d.properties.pourcentage_visites != null
-                  ? d.properties.pourcentage_visites.toFixed(2) + " %"
-                  : "Aucune donnée"
-              }`,
-            ariaLabel: null,
-          }),
-        ],
-        width,
-        height,
-        margin: 0,
-      });
-      const container = document.createElement("div");
-      container.style.display = "flex";
-      container.style.gap = "2rem";
-      container.style.justifyContent = "center";
-      container.style.alignItems = "center";
-      container.style.flexWrap = "wrap";
-      container.appendChild(mapPauvrete);
-      container.appendChild(mapCulture);
-      plotHolder.innerHTML = "";
-      plotHolder.appendChild(container);
+    function safeHolderWidth() {
+      const w = plotHolder.getBoundingClientRect().width || 0;
+      return w > 0 ? w : 900; // fallback
+    }
 
-      const paths = plotHolder.querySelectorAll("path");
-      paths.forEach((path) => {
+    function computeDims() {
+      const holderWidth = safeHolderWidth();
+      const isTwoCols = (window.innerWidth || 0) >= 768; // md:
+      const cols = isTwoCols ? 2 : 1;
+      const gapPx = 24; // ~ gap-6
+      const plotWidth = Math.floor((holderWidth - (cols - 1) * gapPx) / cols);
+      const plotHeight = Math.max(Math.round(plotWidth * 1.05), 420);
+      return { plotWidth, plotHeight };
+    }
+
+    function attachTooltips(root) {
+      root.querySelectorAll("path").forEach((path) => {
         const title =
           path.getAttribute("aria-label") ||
-          path.querySelector("title")?.textContent ||
+          (path.querySelector("title") &&
+            path.querySelector("title").textContent) ||
           "";
 
         const titleElement = path.querySelector("title");
-        if (titleElement) {
-          titleElement.remove();
-        }
+        if (titleElement) titleElement.remove();
         path.removeAttribute("aria-label");
 
         path.style.cursor = "pointer";
         path.style.transition = "all 0.2s ease";
+
         path.addEventListener("mouseenter", (e) => {
           tooltip.textContent = title;
           tooltip.style.display = "block";
@@ -214,25 +184,112 @@ const uniqueId = `graph-5-${Math.random().toString(36).substr(2, 9)}`;
           path.style.opacity = "1";
         });
       });
-    } catch (err) {
-      console.error("Erreur:", err);
-      plotHolder.innerHTML =
-        '<div class="text-red-400">Erreur de chargement des cartes</div>';
     }
+
+    function makeCard(titleText, plotNode) {
+      const card = document.createElement("div");
+      card.className = "w-full";
+
+      const title = document.createElement("h3");
+      title.className = "map-title"; // style ci-dessous
+      title.textContent = titleText;
+
+      card.appendChild(title);
+      card.appendChild(plotNode);
+      return card;
+    }
+
+    function render() {
+      const { plotWidth, plotHeight } = computeDims();
+
+      // On laisse Plot sans 'title' interne et on met le titre au-dessus en HTML
+      const mapPauvrete = Plot.plot({
+        projection: { type: "mercator", domain: france },
+        color: { scheme: "Reds", label: "Taux de pauvreté (%)" },
+        marks: [
+          Plot.geo(france, {
+            fill: (d) => d.properties.taux_pauvrete,
+            stroke: "#fff",
+            title: (d) =>
+              `${d.properties.nom}\n${
+                d.properties.taux_pauvrete != null
+                  ? d.properties.taux_pauvrete + " %"
+                  : "Aucune donnée"
+              }`,
+            ariaLabel: null,
+          }),
+        ],
+        width: plotWidth,
+        height: plotHeight,
+        margin: 0,
+      });
+
+      const mapCulture = Plot.plot({
+        projection: { type: "mercator", domain: france },
+        color: { scheme: "YlGnBu", label: "% d'habitants", domain: [0, 100] },
+        marks: [
+          Plot.geo(france, {
+            fill: (d) => {
+              const v = d.properties.pourcentage_visites;
+              return v == null ? 0 : Math.max(0, Math.min(100, v));
+            },
+            stroke: "#fff",
+            title: (d) =>
+              `${d.properties.nom}\n${
+                d.properties.pourcentage_visites != null
+                  ? d.properties.pourcentage_visites.toFixed(2) + " %"
+                  : "Aucune donnée"
+              }`,
+            ariaLabel: null,
+          }),
+        ],
+        width: plotWidth,
+        height: plotHeight,
+        margin: 0,
+      });
+
+      plotHolder.innerHTML = "";
+      const leftCard = makeCard(
+        "Taux de pauvreté (%) par département",
+        mapPauvrete
+      );
+      const rightCard = makeCard(
+        "Part estimée de la population ayant visité un musée (%)",
+        mapCulture
+      );
+      plotHolder.appendChild(leftCard);
+      plotHolder.appendChild(rightCard);
+
+      attachTooltips(plotHolder);
+    }
+
+    // Premier rendu
+    render();
+
+    // Re-rendu quand la taille du conteneur change
+    const ro = new ResizeObserver(() => render());
+    ro.observe(plotHolder);
+    window.addEventListener("orientationchange", render);
   })();
 </script>
+
 <style>
-  #double-map-container {
+  .graph-container {
     position: relative;
     width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem;
   }
-  #plot-holder-5 {
+  .plot-holder {
     width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
+  @media (min-width: 768px) {
+    .plot-holder {
+      grid-template-columns: 1fr 1fr; /* 2 colonnes à partir de md */
+    }
+  }
+
   .tooltip {
     display: none;
     position: fixed;
@@ -252,5 +309,18 @@ const uniqueId = `graph-5-${Math.random().toString(36).substr(2, 9)}`;
     line-height: 1.6;
     border: 1px solid rgba(255, 255, 255, 0.2);
     z-index: 1000;
+  }
+  .map-title {
+    font-family:
+      "Red Hat Display",
+      system-ui,
+      -apple-system,
+      sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem; /* ~ text-[16.8px] */
+    line-height: 1.35;
+    color: oklch(22% 0 0); /* texte foncé */
+    margin: 0 0 0.5rem 0;
+    text-align: center; /* aligne avec la carte */
   }
 </style>

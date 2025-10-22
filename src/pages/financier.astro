@@ -1,0 +1,453 @@
+---
+import Layout from "../layouts/Layout.astro";
+import photo from "../assets/photo_geographie.jpg";
+import Graph7 from "../components/Graph1.astro"; 
+import Graph8 from "../components/Graph2.astro"; 
+---
+
+<style>
+  .nav-link.btn-primary .nav-dot {
+    background-color: white !important;
+  }
+</style>
+
+<Layout>
+  <!-- Section d'intro -->
+  <section class="hero min-h-screen bg-base-100">
+    <div
+      class="hero-content flex-col lg:flex-row gap-12 max-w-7xl h-full flex items-start pt-48 justify-center"
+    >
+      <!-- Texte gauche -->
+      <div class="lg:w-1/2 flex flex-col justify-center">
+        <h1 class="text-5xl font-bold text-base-content">
+          Impact des acteurs culturels sur les territoires
+        </h1>
+
+        <h2 class="text-2xl font-semibold text-base-content mt-6">
+          Pourquoi cette étape ?
+        </h2>
+
+        <p class="py-4 text-base-content">
+          Après avoir analysé l’offre culturelle, le niveau de vie et les
+          usages, il est temps de se concentrer sur celles et ceux qui font
+          vivre la culture&nbsp;: les artistes, techniciens, médiateurs,
+          enseignants, etc. L’objectif est de comprendre si la présence
+          d’acteurs culturels favorise une offre plus dense, vivante et
+          régulière, et inversement, si leur absence peut expliquer certaines
+          fragilités locales.
+        </p>
+      </div>
+
+      <!-- Image droite -->
+      <div class="card bg-base-200 shadow-xl lg:w-2/3 lg:h-1/2 p-0 rounded-xl">
+        <div
+          class="card-body items-center justify-center h-full p-0 rounded-xl"
+        >
+          <img
+            src={photo.src}
+            alt="Photographie d'un paysage"
+            class="rounded-xl"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Indicateur scroll -->
+    <div
+      class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center"
+    >
+      <p class="text-base-content opacity-40 text-sm mb-2">Faites défiler</p>
+      <div
+        class="w-4 h-4 border-2 border-base-content opacity-40 rounded-full animate-bounce"
+      >
+      </div>
+    </div>
+  </section>
+
+  <!-- Section Exploration -->
+  <section class="hero bg-neutral text-neutral-content py-20">
+    <div class="hero-content text-center">
+      <div class="max-w-3xl flex flex-col items-center">
+        <h2 class="text-4xl font-bold mb-4">Explorer les données</h2>
+        <p class="text-lg opacity-80 mb-8">
+          Visualisez la présence des professionnels de la culture et son lien
+          avec l’infrastructure culturelle des territoires.
+        </p>
+        <div class="flex gap-4 flex-wrap">
+          <a href="#repartition" class="btn btn-secondary hover:btn-primary">
+            Répartition des acteurs culturels (carte)
+          </a>
+          <a href="#typologie" class="btn btn-secondary hover:btn-primary">
+            Profils : Acteurs vs Lieux (nuage de points)
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Menu latéral -->
+  <aside
+    class="hidden lg:block fixed left-4 top-1/2 -translate-y-1/2 z-40"
+    id="graphNav"
+  >
+    <div class="card bg-base-200 shadow-xl p-4">
+      <div class="flex flex-col gap-3">
+        <div class="text-xs font-semibold opacity-60 mb-2">Navigation</div>
+        <a
+          href="#repartition"
+          class="nav-link btn btn-sm btn-ghost justify-start gap-2 hover:btn-primary"
+          data-section="repartition"
+          title="Répartition des acteurs"
+        >
+          <span class="nav-dot w-2 h-2 rounded-full bg-primary"></span>
+          <span class="text-xs">Répartition</span>
+        </a>
+        <a
+          href="#typologie"
+          class="nav-link btn btn-sm btn-ghost justify-start gap-2 hover:btn-primary"
+          data-section="typologie"
+          title="Profils Acteurs/Lieux"
+        >
+          <span class="nav-dot w-2 h-2 rounded-full bg-primary"></span>
+          <span class="text-xs">Profils</span>
+        </a>
+        <a
+          href="#conclusion"
+          class="nav-link btn btn-sm btn-ghost justify-start gap-2 hover:btn-primary"
+          data-section="conclusion"
+          title="Conclusion"
+        >
+          <span class="nav-dot w-2 h-2 rounded-full bg-primary"></span>
+          <span class="text-xs">Conclusion</span>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Section Analyse : Graph1 (carte bulle) -->
+  <section id="repartition" class="relative py-24 px-6 bg-base-100">
+    <div
+      class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
+    >
+      <!-- Graphique -->
+      <div class="relative">
+        <div
+          class="relative card bg-base-200 shadow-xl rounded-2xl overflow-hidden"
+        >
+          <div
+            class="p-4 border-b border-base-300 flex items-center justify-between"
+          >
+            <span class="badge badge-primary badge-lg">Graphique</span>
+            <div class="join">
+              <span class="join-item badge">France</span>
+              <span class="join-item badge">Départements</span>
+            </div>
+          </div>
+          <div class="p-4">
+            <Graph7 />
+          </div>
+        </div>
+      </div>
+
+      <!-- Explications -->
+      <aside class="space-y-6 lg:sticky lg:top-24">
+        <div class="inline-flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-secondary"></div>
+          <span class="text-sm opacity-60">Étape — Acteurs & Territoires</span>
+        </div>
+
+        <h3 class="text-3xl font-bold">
+          Répartition spatiale des personnes travaillant dans la culture
+        </h3>
+
+        <h4 class="text-1xl font-medium">Ce que l’on voit</h4>
+        <p class="leading-relaxed">
+          La carte interactive montre, par département, le nombre de personnes
+          travaillant dans la culture. Plus le cercle est grand, plus la
+          concentration de professionnels (artistes, techniciens, médiateurs,
+          enseignants, etc.) est élevée. Les grandes aires urbaines — notamment
+          Paris — ressortent fortement, tandis que de nombreux territoires
+          apparaissent faiblement dotés.
+        </p>
+
+        <h4 class="text-1xl font-medium">Comment l’interpréter</h4>
+        <p class="leading-relaxed">
+          Cette représentation offre une lecture spatiale immédiate des
+          ressources humaines culturelles. Elle permet d’identifier des zones
+          potentiellement fragiles où l’animation locale manque de forces vives,
+          et d’orienter des politiques de soutien (formation, emploi, médiation,
+          résidences). À croiser avec l’offre de lieux, la densité de population
+          et la mobilité pour qualifier les besoins.
+        </p>
+
+        <div class="divider my-2">Bases de données utilisées</div>
+        <ul class="space-y-3">
+          <li>
+            <a
+              href="https://www.data.gouv.fr/datasets/emploi-professions-culturelles-par-departement/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-500 hover:text-blue-700 hover:underline transition font-medium"
+              >Professions culturelles par département</a
+            >
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Section Analyse : Graph2 (nuage points Acteurs vs Lieux) -->
+  <section id="typologie" class="relative py-24 px-6 bg-base-100">
+    <div
+      class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
+    >
+      <!-- Graphique -->
+      <div class="relative">
+        <div
+          class="absolute -inset-2 rounded-2xl bg-gradient-to-br from-base-300 to-base-200 opacity-60 blur-md"
+        >
+        </div>
+        <div
+          class="relative card bg-base-200 shadow-xl rounded-2xl overflow-hidden"
+        >
+          <div
+            class="p-4 border-b border-base-300 flex items-center justify-between"
+          >
+            <span class="badge badge-primary badge-lg">Graphique</span>
+            <div class="join">
+              <span class="join-item badge">France</span>
+              <span class="join-item badge">Départements</span>
+            </div>
+          </div>
+          <div class="p-4">
+            <Graph8 />
+          </div>
+        </div>
+      </div>
+
+      <!-- Explications -->
+      <aside class="space-y-6 lg:sticky lg:top-24">
+        <div class="inline-flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full bg-secondary"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+          <span class="text-sm opacity-60">Étape — Acteurs & Territoires</span>
+        </div>
+
+        <h3 class="text-3xl font-bold">
+          Profils culturels par département — Acteurs vs Lieux (points
+          équilibrés)
+        </h3>
+
+        <h4 class="text-1xl font-medium">Ce que l’on voit</h4>
+        <p class="leading-relaxed">
+          Chaque point représente un département et situe le rapport entre la
+          présence d’acteurs culturels et celle de lieux culturels. Le nuage met
+          en évidence une tendance globale&nbsp;: les territoires qui comptent
+          davantage de professionnels disposent souvent d’un plus grand nombre
+          de lieux. À l’inverse, certains points s’écartent de cette tendance et
+          signalent des déséquilibres.
+        </p>
+
+        <h4 class="text-1xl font-medium">Comment l’interpréter</h4>
+        <p class="leading-relaxed">
+          Cette typologie permet d’identifier quatre profils&nbsp;: équilibre
+          (acteurs&nbsp;+&nbsp;lieux), tension humaine (lieux nombreux mais peu
+          d’acteurs), potentiel latent (acteurs nombreux mais peu de lieux) et
+          déficit global. Elle éclaire des priorités d’action différentes&nbsp;:
+          renforcer l’emploi culturel, soutenir la création/gestion de lieux, ou
+          travailler la mise en réseau et la médiation pour transformer le
+          potentiel en offre effective.
+        </p>
+
+        <div class="divider my-2">Bases de données utilisées</div>
+        <ul class="space-y-3">
+          <li>
+            <a
+              href="https://data.culture.gouv.fr/explore/dataset/base-des-lieux-et-des-equipements-culturels/information/?disjunctive.sous_domaine&disjunctive.region&disjunctive.type_equipement_ou_lieu&disjunctive.domaine&disjunctive.label_et_appellation&disjunctive.departement&disjunctive.precision_equipement"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-500 hover:text-blue-700 hover:underline transition font-medium"
+              >Base des lieux et équipements culturels</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://www.data.gouv.fr/datasets/emploi-professions-culturelles-par-departement/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-500 hover:text-blue-700 hover:underline transition font-medium"
+              >Professions culturelles par département</a
+            >
+          </li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Conclusion -->
+  <section
+    id="conclusion"
+    class="relative py-32 px-6 bg-gradient-to-br from-base-100 via-base-200 to-base-100 overflow-hidden"
+  >
+    <div
+      class="absolute top-0 right-0 w-96 h-96 bg-primary opacity-5 rounded-full blur-3xl -mr-48 -mt-48"
+    >
+    </div>
+    <div
+      class="absolute bottom-0 left-0 w-96 h-96 bg-secondary opacity-5 rounded-full blur-3xl -ml-48 -mb-48"
+    >
+    </div>
+
+    <div class="max-w-4xl mx-auto relative z-10">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-3 mb-6">
+          <div class="h-1 w-12 bg-primary"></div>
+          <span
+            class="text-sm font-semibold uppercase tracking-widest text-primary"
+            >Conclusion</span
+          >
+          <div class="h-1 w-12 bg-primary"></div>
+        </div>
+        <h2
+          class="text-5xl lg:text-6xl font-bold text-base-content leading-tight"
+        >
+          Des lieux… mais surtout des personnes
+        </h2>
+      </div>
+
+      <div class="space-y-8 text-lg leading-relaxed">
+        <p class="text-base-content opacity-90">
+          Ces deux visualisations montrent que la répartition des professionnels
+          de la culture est un facteur clef de la vitalité culturelle locale.
+          Les grandes villes concentrent une part majeure des acteurs, tandis
+          que des zones rurales ou périphériques restent peu dotées. Sans
+          acteurs, difficile d’animer les lieux, d’organiser des événements et
+          de mobiliser le public.
+        </p>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div
+            class="bg-base-300 bg-opacity-50 rounded-xl p-6 border-l-4 border-primary"
+          >
+            <h3
+              class="font-bold text-base-content mb-3 flex items-center gap-2"
+            >
+              <span class="badge badge-primary">1</span>
+              Lecture spatiale
+            </h3>
+            <p class="text-sm text-base-content opacity-85">
+              La carte révèle les zones de concentration et les “déserts”
+              d’acteurs, utiles pour prioriser les dispositifs de soutien et
+              d’implantation.
+            </p>
+          </div>
+
+          <div
+            class="bg-base-300 bg-opacity-50 rounded-xl p-6 border-l-4 border-accent"
+          >
+            <h3
+              class="font-bold text-base-content mb-3 flex items-center gap-2"
+            >
+              <span class="badge badge-accent">2</span>
+              Profils et déséquilibres
+            </h3>
+            <p class="text-sm text-base-content opacity-85">
+              Le nuage de points distingue équilibre, tension humaine, potentiel
+              latent et déficit global, pour des réponses publiques adaptées.
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="bg-base-300 bg-opacity-50 rounded-2xl p-8 border border-primary/20"
+        >
+          <h3 class="text-2xl font-bold text-base-content mb-4">
+            Le cercle limitant
+          </h3>
+          <p class="text-base-content opacity-90">
+            Là où les acteurs manquent, l’offre stagne ou disparaît,
+            l’attractivité baisse et les initiatives se raréfient. La culture ne
+            tient pas qu’aux équipements&nbsp;: elle repose d’abord sur les
+            personnes qui la portent au quotidien.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex justify-center mt-12 pt-8 border-t border-base-300">
+        <a href="/" class="btn btn-primary btn-lg gap-2">
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+            ></path>
+          </svg>
+          Retour au sommaire
+        </a>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const graphNav = document.getElementById("graphNav");
+        const firstSection = document.getElementById("repartition");
+        const lastSection = document.getElementById("conclusion");
+        const navLinks = document.querySelectorAll(".nav-link");
+        const sections = ["repartition", "typologie", "conclusion"];
+
+        if (graphNav && firstSection && lastSection) {
+          graphNav.style.opacity = "0";
+          graphNav.style.pointerEvents = "none";
+          graphNav.style.transition = "opacity 0.3s ease-in-out";
+
+          const updateActiveLink = () => {
+            let activeSection = null;
+            for (const id of sections) {
+              const el = document.getElementById(id);
+              if (el) {
+                const r = el.getBoundingClientRect();
+                if (r.top <= 200 && r.bottom > 200) {
+                  activeSection = id;
+                  break;
+                }
+              }
+            }
+            navLinks.forEach((link) => {
+              const linkSection = link.getAttribute("data-section");
+              if (linkSection === activeSection) {
+                link.classList.remove("btn-ghost");
+                link.classList.add("btn-primary");
+              } else {
+                link.classList.remove("btn-primary");
+                link.classList.add("btn-ghost");
+              }
+            });
+          };
+
+          const checkVisibility = () => {
+            const f = firstSection.getBoundingClientRect();
+            const l = lastSection.getBoundingClientRect();
+            if (f.top <= 100 && l.bottom > 0) {
+              graphNav.style.opacity = "1";
+              graphNav.style.pointerEvents = "auto";
+            } else {
+              graphNav.style.opacity = "0";
+              graphNav.style.pointerEvents = "none";
+            }
+            updateActiveLink();
+          };
+
+          window.addEventListener("scroll", checkVisibility);
+          checkVisibility();
+        }
+      });
+    </script>
+  </section>
+</Layout>
