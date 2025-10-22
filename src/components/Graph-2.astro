@@ -1,0 +1,159 @@
+---
+import * as d3 from "d3";
+import fs from "fs";
+import path from "path";
+const assetsDir = path.join(process.cwd(), "src", "assets");
+const csvText = fs.readFileSync(
+  path.join(assetsDir, "base_culturelle_nettoyee.csv"),
+  "utf8"
+);
+const baseCulturelleNettoyee = d3.csvParse(csvText);
+const geoText = fs.readFileSync(
+  path.join(assetsDir, "departements.geojson"),
+  "utf8"
+);
+const departements = JSON.parse(geoText);
+const typesEquipements = Array.from(
+  new Set(baseCulturelleNettoyee.map((d: any) => d["Type équipement ou lieu"]))
+).sort();
+const baseCulturelleJson = JSON.stringify(baseCulturelleNettoyee);
+const departementsJson = JSON.stringify(departements);
+const typesEquipementsJson = JSON.stringify(typesEquipements);
+---
+
+<div id="map-filter-container">
+  <div class="filter-section">
+    <label for="type-equipement" class="filter-label"
+      >Type d'équipement culturel :</label
+    >
+    <select id="type-equipement" class="filter-select">
+      <option value="Musée">Musée</option>
+    </select>
+  </div>
+  <div
+    id="plot-holder-2"
+    class="flex justify-center min-h-[600px] items-center"
+  >
+    <div class="text-zinc-400">Chargement de la carte...</div>
+  </div>
+</div>
+<script
+  type="module"
+  define:vars={{ baseCulturelleJson, departementsJson, typesEquipementsJson }}
+>
+  (async () => {
+    const Plot = await import(
+      "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm"
+    );
+    const d3 = await import("https://cdn.jsdelivr.net/npm/d3@7/+esm");
+    const baseCulturelleNettoyee = JSON.parse(baseCulturelleJson);
+    const departements = JSON.parse(departementsJson);
+    const typesEquipements = JSON.parse(typesEquipementsJson);
+    const plotHolder = document.getElementById("plot-holder-2");
+    const selectElement = document.getElementById("type-equipement");
+    selectElement.innerHTML = typesEquipements
+      .map((type) => `<option value="${type}">${type}</option>`)
+      .join("");
+    const grandesVilles = [
+      { ville: "Paris", lon: 2.35, lat: 48.85 },
+      { ville: "Lyon", lon: 4.83, lat: 45.76 },
+      { ville: "Marseille", lon: 5.38, lat: 43.3 },
+      { ville: "Bordeaux", lon: -0.58, lat: 44.84 },
+      { ville: "Toulouse", lon: 1.44, lat: 43.6 },
+      { ville: "Lille", lon: 3.06, lat: 50.63 },
+      { ville: "Nantes", lon: -1.55, lat: 47.21 },
+      { ville: "Strasbourg", lon: 7.75, lat: 48.58 },
+      { ville: "Nice", lon: 7.26, lat: 43.7 },
+      { ville: "Rennes", lon: -1.68, lat: 48.11 },
+    ];
+    function createPlot(typeLieu) {
+      try {
+        const lieuxFiltres = baseCulturelleNettoyee.filter(
+          (d) => d["Type équipement ou lieu"] === typeLieu
+        );
+        const totalPoints = lieuxFiltres.length;
+        const fillOpacity = d3
+          .scaleLinear()
+          .domain([100, 5000])
+          .range([0.8, 0.15])
+          .clamp(true)(totalPoints);
+        const plot = Plot.plot({
+          projection: { type: "mercator", domain: departements },
+          marks: [
+            Plot.geo(departements, {
+              fill: "#fafafa",
+              stroke: "#ddd",
+            }),
+            Plot.dot(lieuxFiltres, {
+              x: "Longitude",
+              y: "Latitude",
+              r: 3.5,
+              fill: "#0077b6",
+              fillOpacity: fillOpacity,
+              stroke: "none",
+              title: (d) => `${d["Nom"]}\n${d["libelle_geographique"]}`,
+            }),
+            Plot.text(grandesVilles, {
+              x: "lon",
+              y: "lat",
+              text: "ville",
+              fontSize: 10,
+              fill: "#111",
+              textAnchor: "middle",
+              dy: -6,
+              stroke: "white",
+              strokeWidth: 3,
+              strokeOpacity: 0.8,
+            }),
+          ],
+          width: 800,
+          height: 600,
+        });
+        plotHolder.innerHTML = "";
+        plotHolder.appendChild(plot);
+      } catch (err) {
+        console.error("Erreur:", err);
+        plotHolder.innerHTML =
+          '<div class="text-red-400">Erreur de chargement</div>';
+      }
+    }
+    createPlot(selectElement.value);
+    selectElement.addEventListener("change", (e) => {
+      createPlot(e.target.value);
+    });
+  })();
+</script>
+
+<style>
+  #map-filter-container {
+    width: 100%;
+  }
+  .filter-section {
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .filter-label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #374151;
+  }
+  .filter-select {
+    padding: 0.5rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 0.95rem;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .filter-select:hover {
+    border-color: #9ca3af;
+  }
+  .filter-select:focus {
+    outline: none;
+    border-color: #0077b6;
+    box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.1);
+  }
+</style>
