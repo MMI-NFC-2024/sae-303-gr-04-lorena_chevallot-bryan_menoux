@@ -274,10 +274,6 @@ const uniqueId = `graph-5-${Math.random().toString(36).substr(2, 9)}`;
 </script>
 
 <style>
-  .graph-container {
-    position: relative;
-    width: 100%;
-  }
   .plot-holder {
     width: 100%;
     display: grid;
@@ -286,10 +282,55 @@ const uniqueId = `graph-5-${Math.random().toString(36).substr(2, 9)}`;
   }
   @media (min-width: 768px) {
     .plot-holder {
-      grid-template-columns: 1fr 1fr; /* 2 colonnes à partir de md */
+      grid-template-columns: 1fr 1fr; /* 2 colonnes dès md */
     }
   }
 
+  /* Card sobre autour de chaque carte */
+  .map-card {
+    background: oklch(98% 0 0); /* très léger gris */
+    border: 1px solid oklch(92% 0 0);
+    border-radius: 14px;
+    padding: 14px 14px 10px;
+  }
+
+  /* Titre */
+  .map-title {
+    font-family:
+      "Red Hat Display",
+      system-ui,
+      -apple-system,
+      sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    line-height: 1.35;
+    color: oklch(22% 0 0);
+    margin: 2px 6px 8px;
+    text-align: center;
+  }
+
+  /* Légende dense, centrée, séparée */
+  .map-legend {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2px 4px 10px;
+  }
+  .map-legend > * {
+    max-width: 100%;
+  }
+
+  /* Figure (svg) */
+  .map-figure {
+    display: flex;
+    justify-content: center;
+  }
+  .map-figure > * {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Tooltip (identique) */
   .tooltip {
     display: none;
     position: fixed;
@@ -309,18 +350,5 @@ const uniqueId = `graph-5-${Math.random().toString(36).substr(2, 9)}`;
     line-height: 1.6;
     border: 1px solid rgba(255, 255, 255, 0.2);
     z-index: 1000;
-  }
-  .map-title {
-    font-family:
-      "Red Hat Display",
-      system-ui,
-      -apple-system,
-      sans-serif;
-    font-weight: 700;
-    font-size: 1.05rem; /* ~ text-[16.8px] */
-    line-height: 1.35;
-    color: oklch(22% 0 0); /* texte foncé */
-    margin: 0 0 0.5rem 0;
-    text-align: center; /* aligne avec la carte */
   }
 </style>

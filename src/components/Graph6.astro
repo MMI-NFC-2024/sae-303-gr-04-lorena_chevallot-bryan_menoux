@@ -93,33 +93,62 @@ const uniqueId = `graph-6-${Math.random().toString(36).substr(2, 9)}`;
     border: 1px solid rgba(255, 255, 255, 0.2);
     z-index: 1000;
   }
+  /* Aligne parfaitement la légende au-dessus des cellules */
+  .heatmap-frame {
+    display: block;
+  }
+  .legend-row {
+    display: block;
+    margin-bottom: 6px;
+  }
+  .legend-row svg {
+    display: block;
+  } /* évite les espaces inline */
 </style>
 <script type="module" define:vars={{ tidyJson, uniqueId }}>
   const tidy = JSON.parse(tidyJson);
+
   async function renderPlot() {
     try {
       const Plot = await import(
         "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm"
       );
       const d3 = await import("https://cdn.jsdelivr.net/npm/d3@7/+esm");
+
+      const container = document.querySelector(`[data-graph-id="${uniqueId}"]`);
+      const holder = container?.querySelector(".plot-holder");
+      const tooltip = container?.querySelector(".tooltip");
+      if (!holder) return;
+
       const maxValue = d3.max(tidy, (d) => d.Valeur);
+
+      // Dimensions + marges (identiques au plot)
+      const plotWidth = 750;
+      const plotHeight = 400;
+      const marginLeft = 190; // même valeur que ton plot
+      const marginBottom = 120; // idem
+
+      // Échelle partagée
+      const colorScale = {
+        scheme: "YlGnBu",
+        label: "Taux (%)",
+        domain: [0, maxValue],
+      };
+
+      // Légende : largeur = largeur des cellules (sans la marge gauche)
+      const legend = Plot.legend({
+        color: colorScale,
+        width: plotWidth - marginLeft,
+      });
+
+      // Heatmap (sans légende intégrée)
       const heatmap = Plot.plot({
-        marginLeft: 190,
-        marginBottom: 120,
-        color: {
-          scheme: "YlGnBu",
-          label: "Taux (%)",
-          legend: true,
-          domain: [0, maxValue],
-        },
-        x: {
-          label: "Catégorie socioprofessionnelle",
-          tickRotate: -45,
-        },
-        y: {
-          label: null,
-          domain: tidy.map((d) => d.Activité).reverse(),
-        },
+        marginTop: 4,
+        marginLeft,
+        marginBottom,
+        color: { ...colorScale, legend: false },
+        x: { label: "Catégorie socioprofessionnelle", tickRotate: -45 },
+        y: { label: null, domain: tidy.map((d) => d.Activité).reverse() },
         marks: [
           Plot.cell(tidy, {
             x: "Catégorie",
@@ -137,67 +166,65 @@ const uniqueId = `graph-6-${Math.random().toString(36).substr(2, 9)}`;
             fontSize: 11,
           }),
         ],
-        width: 750,
-        height: 400,
+        width: plotWidth,
+        height: plotHeight,
       });
 
-      const container = document.querySelector(`[data-graph-id="${uniqueId}"]`);
-      const plotHolder = container?.querySelector(".plot-holder");
-      const tooltip = container?.querySelector(".tooltip");
+      // Injection : on crée un wrapper de la largeur du plot, avec padding-left = marginLeft
+      holder.innerHTML = "";
+      const frame = document.createElement("div");
+      frame.className = "heatmap-frame";
+      frame.style.width = plotWidth + "px";
 
-      if (plotHolder && tooltip) {
-        plotHolder.innerHTML = "";
-        plotHolder.appendChild(heatmap);
-        const cells = plotHolder.querySelectorAll("rect");
-        const cellTitles = new Map();
-        cells.forEach((cell) => {
-          const titleElement = cell.querySelector("title");
-          const title = titleElement?.textContent || "";
-          cellTitles.set(cell, title);
-          if (titleElement) {
-            titleElement.remove();
-          }
-          cell.removeAttribute("aria-label");
+      const legendRow = document.createElement("div");
+      legendRow.className = "legend-row";
+      legendRow.style.paddingLeft = marginLeft + "px"; // aligne la légende avec les cellules
+      legendRow.appendChild(legend);
+
+      frame.appendChild(legendRow);
+      frame.appendChild(heatmap);
+      holder.appendChild(frame);
+
+      // Tooltips
+      const cells = holder.querySelectorAll("rect");
+      const cellTitles = new Map();
+      cells.forEach((cell) => {
+        const t = cell.querySelector("title");
+        cellTitles.set(cell, t?.textContent || "");
+        if (t) t.remove();
+        cell.removeAttribute("aria-label");
+        cell.style.cursor = "pointer";
+        cell.style.transition = "all 0.2s ease";
+        cell.addEventListener("mouseenter", (e) => {
+          if (!tooltip) return;
+          tooltip.textContent = cellTitles.get(cell);
+          tooltip.style.display = "block";
+          tooltip.style.left = e.clientX + 10 + "px";
+          tooltip.style.top = e.clientY + 10 + "px";
+          cell.style.stroke = "#2563eb";
+          cell.style.filter = "brightness(1.1) saturate(1.05)";
+          cell.style.opacity = "0.95";
         });
-        let currentHighlightedCell = null;
-        cells.forEach((cell) => {
-          cell.style.cursor = "pointer";
-          cell.style.transition = "all 0.2s ease";
-          cell.style.pointerEvents = "all";
-          cell.addEventListener("mouseenter", (e) => {
-            const title = cellTitles.get(cell);
-            tooltip.textContent = title;
-            tooltip.style.display = "block";
-            tooltip.style.left = e.clientX + 10 + "px";
-            tooltip.style.top = e.clientY + 10 + "px";
-            currentHighlightedCell = cell;
-            cell.style.stroke = "#2563eb";
-            cell.style.filter = "brightness(1.15) saturate(1.2)";
-            cell.style.opacity = "0.9";
-          });
-          cell.addEventListener("mousemove", (e) => {
-            tooltip.style.left = e.clientX + 10 + "px";
-            tooltip.style.top = e.clientY + 10 + "px";
-          });
-          cell.addEventListener("mouseleave", (e) => {
-            const relatedTarget = e.relatedTarget;
-            if (!relatedTarget || relatedTarget.tagName !== "text") {
-              tooltip.style.display = "none";
-              currentHighlightedCell = null;
-              cell.style.stroke = "#fff";
-              cell.style.filter = "none";
-              cell.style.opacity = "1";
-            }
-          });
+        cell.addEventListener("mousemove", (e) => {
+          if (!tooltip) return;
+          tooltip.style.left = e.clientX + 10 + "px";
+          tooltip.style.top = e.clientY + 10 + "px";
         });
-        const texts = plotHolder.querySelectorAll("text");
-        texts.forEach((text) => {
-          text.style.cursor = "pointer";
-          text.style.pointerEvents = "none";
+        cell.addEventListener("mouseleave", () => {
+          if (!tooltip) return;
+          tooltip.style.display = "none";
+          cell.style.stroke = "#fff";
+          cell.style.filter = "none";
+          cell.style.opacity = "1";
         });
-      }
-    } catch (error) {
-      console.error("Erreur lors du rendu du graphique 6 :", error);
+      });
+
+      // rAF pour assurer la mise en page au premier paint (évite un léger décalage)
+      requestAnimationFrame(() => {
+        // rien de plus à faire ici, mais garde la possibilité de tweaks si besoin
+      });
+    } catch (e) {
+      console.error("Erreur heatmap/legend:", e);
     }
   }
   renderPlot();
