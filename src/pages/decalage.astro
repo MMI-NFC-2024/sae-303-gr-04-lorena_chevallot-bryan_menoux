@@ -1,0 +1,340 @@
+---
+import Layout from "../layouts/Layout.astro";
+import photo from "../assets/photo_geographie.jpg";
+import Graph1 from "../components/Graph1.astro";
+---
+
+<style>
+  .nav-link.btn-primary .nav-dot {
+    background-color: white !important;
+  }
+</style>
+
+<Layout>
+  <!-- Section d'intro -->
+  <section class="hero min-h-screen bg-base-100">
+    <div
+      class="hero-content flex-col lg:flex-row gap-12 max-w-7xl h-full flex items-start pt-48 justify-center"
+    >
+      <!-- Texte gauche -->
+      <div class="lg:w-1/2 flex flex-col justify-center">
+        <h1 class="text-5xl font-bold text-base-content">
+          Décalage entre richesse patrimoniale et culture vivante (évènementiel)
+        </h1>
+
+        <h2 class="text-2xl font-semibold text-base-content mt-6">
+          Pourquoi cette étape ?
+        </h2>
+
+        <p class="py-4 text-base-content">
+          Certains territoires français sont riches en patrimoine ancien
+          (châteaux, monuments historiques…), mais cette richesse ne garantit
+          pas une vie culturelle dynamique. L’objectif ici est de vérifier si la
+          densité patrimoniale s’accompagne d’une offre culturelle vivante
+          (équipements et événements).
+        </p>
+        <p class="py-2 text-base-content">
+          Nous cherchons aussi à identifier les territoires où les festivals
+          peuvent compenser un manque d’équipements culturels, ou au contraire,
+          où le patrimoine reste peu “activé” par l’événementiel.
+        </p>
+
+        <!-- Boutons -->
+        <div class="flex flex-wrap gap-4 pt-4">
+          <a href="#croisement" class="btn btn-secondary hover:btn-primary">
+            Monuments vs Festivals — Comparatif régional
+          </a>
+          <a href="#conclusion" class="btn btn-ghost">
+            Aller à la conclusion
+          </a>
+        </div>
+      </div>
+
+      <!-- Image droite -->
+      <div class="card bg-base-200 shadow-xl lg:w-2/3 lg:h-1/2 p-0 rounded-xl">
+        <div
+          class="card-body items-center justify-center h-full p-0 rounded-xl"
+        >
+          <img
+            src={photo.src}
+            alt="Photographie d'un paysage"
+            class="rounded-xl"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Indicateur scroll -->
+    <div
+      class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center"
+    >
+      <p class="text-base-content opacity-40 text-sm mb-2">Faites défiler</p>
+      <div
+        class="w-4 h-4 border-2 border-base-content opacity-40 rounded-full animate-bounce"
+      >
+      </div>
+    </div>
+  </section>
+
+  <!-- Menu latéral -->
+  <aside
+    class="hidden lg:block fixed left-4 top-1/2 -translate-y-1/2 z-40"
+    id="graphNav"
+  >
+    <div class="card bg-base-200 shadow-xl p-4">
+      <div class="flex flex-col gap-3">
+        <div class="text-xs font-semibold opacity-60 mb-2">Navigation</div>
+        <a
+          href="#croisement"
+          class="nav-link btn btn-sm btn-ghost justify-start gap-2 hover:btn-primary"
+          data-section="croisement"
+          title="Monuments vs Festivals"
+        >
+          <span class="nav-dot w-2 h-2 rounded-full bg-primary"></span>
+          <span class="text-xs">Comparatif</span>
+        </a>
+        <a
+          href="#conclusion"
+          class="nav-link btn btn-sm btn-ghost justify-start gap-2 hover:btn-primary"
+          data-section="conclusion"
+          title="Conclusion"
+        >
+          <span class="nav-dot w-2 h-2 rounded-full bg-primary"></span>
+          <span class="text-xs">Conclusion</span>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Section Analyse : Graphique 1 -->
+  <section id="croisement" class="relative py-24 px-6 bg-base-100">
+    <div
+      class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
+    >
+      <!-- Graphique -->
+      <div class="relative">
+        <div
+          class="relative card bg-base-200 shadow-xl rounded-2xl overflow-hidden"
+        >
+          <div
+            class="p-4 border-b border-base-300 flex items-center justify-between"
+          >
+            <span class="badge badge-primary badge-lg">Graphique</span>
+            <div class="join">
+              <span class="join-item badge">Régions</span>
+              <span class="join-item badge">Monuments ↔ Festivals</span>
+            </div>
+          </div>
+          <div class="p-4">
+            <Graph1 />
+          </div>
+        </div>
+      </div>
+
+      <!-- Explications -->
+      <aside class="space-y-6 lg:sticky lg:top-24">
+        <div class="inline-flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-secondary"></div>
+          <span class="text-sm opacity-60"
+            >Étape — Patrimoine & Événementiel</span
+          >
+        </div>
+
+        <h3 class="text-3xl font-bold">
+          Croisement entre richesse patrimoniale et offre événementielle
+          (festivals)
+        </h3>
+
+        <h4 class="text-1xl font-medium">Ce que l’on voit</h4>
+        <p class="leading-relaxed">
+          Le comparatif montre qu’en tête, des régions très dotées en monuments
+          historiques (Nouvelle-Aquitaine, Occitanie, Auvergne–Rhône-Alpes,
+          Île-de-France) accueillent aussi beaucoup de festivals. Certaines
+          régions touristiques (Bretagne, PACA) se distinguent par un niveau
+          événementiel élevé. À l’inverse, des régions avec peu de patrimoine
+          recensé affichent aussi peu de festivals, suggérant un double
+          désavantage.
+        </p>
+
+        <h4 class="text-1xl font-medium">Ce qu’on en déduit</h4>
+        <p class="leading-relaxed">
+          On observe une relation globale positive&nbsp;: le patrimoine ancien
+          peut servir de socle (image, lieux, réseaux d’acteurs) pour développer
+          une offre vivante et régulière. Toutefois, le lien n’est pas
+          automatique&nbsp;: l’intensité événementielle dépend aussi de
+          l’attractivité touristique, de la densité de population, des
+          infrastructures, des financements et des dynamiques locales. Ce
+          croisement aide à repérer les régions qui activent fortement leur
+          capital patrimonial et celles où un potentiel reste sous-exploité.
+        </p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Conclusion -->
+  <section
+    id="conclusion"
+    class="relative py-32 px-6 bg-gradient-to-br from-base-100 via-base-200 to-base-100 overflow-hidden"
+  >
+    <div
+      class="absolute top-0 right-0 w-96 h-96 bg-primary opacity-5 rounded-full blur-3xl -mr-48 -mt-48"
+    >
+    </div>
+    <div
+      class="absolute bottom-0 left-0 w-96 h-96 bg-secondary opacity-5 rounded-full blur-3xl -ml-48 -mb-48"
+    >
+    </div>
+
+    <div class="max-w-4xl mx-auto relative z-10">
+      <div class="text-center mb-12">
+        <div class="inline-flex items-center gap-3 mb-6">
+          <div class="h-1 w-12 bg-primary"></div>
+          <span
+            class="text-sm font-semibold uppercase tracking-widest text-primary"
+            >Conclusion</span
+          >
+          <div class="h-1 w-12 bg-primary"></div>
+        </div>
+        <h2
+          class="text-5xl lg:text-6xl font-bold text-base-content leading-tight"
+        >
+          Activer le patrimoine pour une culture vivante
+        </h2>
+      </div>
+
+      <div class="space-y-8 text-lg leading-relaxed">
+        <p class="text-base-content opacity-90">
+          Le graphique suggère qu’un stock patrimonial élevé facilite
+          l’émergence d’une offre événementielle, sans pour autant la garantir.
+          Les territoires les plus dynamiques cumulent héritage, réseaux
+          d’acteurs, financements et attractivité. À l’inverse, là où patrimoine
+          et festivals sont faibles, un soutien public ciblé (médiation,
+          coproductions, résidences, ingénierie culturelle) peut enclencher la
+          dynamique.
+        </p>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div
+            class="bg-base-300 bg-opacity-50 rounded-xl p-6 border-l-4 border-primary"
+          >
+            <h3
+              class="font-bold text-base-content mb-3 flex items-center gap-2"
+            >
+              <span class="badge badge-primary">1</span>
+              Profils gagnants
+            </h3>
+            <p class="text-sm text-base-content opacity-85">
+              Régions “activées” : patrimoine fort + festivals denses — effet de
+              levier entre image, lieux et réseaux professionnels.
+            </p>
+          </div>
+          <div
+            class="bg-base-300 bg-opacity-50 rounded-xl p-6 border-l-4 border-accent"
+          >
+            <h3
+              class="font-bold text-base-content mb-3 flex items-center gap-2"
+            >
+              <span class="badge badge-accent">2</span>
+              Risque de double désavantage
+            </h3>
+            <p class="text-sm text-base-content opacity-85">
+              Patrimoine faible + événementiel faible : nécessité d’initiatives
+              structurantes (circuits itinérants, partenariats interrégionaux,
+              accompagnement des équipes).
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="bg-base-300 bg-opacity-50 rounded-2xl p-8 border border-primary/20"
+        >
+          <h3 class="text-2xl font-bold text-base-content mb-4">À retenir</h3>
+          <p class="text-base-content opacity-90">
+            Le patrimoine peut être un moteur puissant, mais la culture vivante
+            se construit surtout par des politiques actives, des acteurs
+            présents et des moyens pérennes. Repérer les écarts entre “stock”
+            patrimonial et vitalité événementielle permet d’orienter les
+            investissements là où ils produisent le plus d’effets.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex justify-center mt-12 pt-8 border-t border-base-300">
+        <a href="/" class="btn btn-primary btn-lg gap-2">
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+            ></path>
+          </svg>
+          Retour au sommaire
+        </a>
+      </div>
+    </div>
+
+    <script>
+      // Affichage du menu latéral + lien actif
+      document.addEventListener("DOMContentLoaded", () => {
+        const graphNav = document.getElementById("graphNav");
+        const firstSection = document.getElementById("croisement");
+        const lastSection = document.getElementById("conclusion");
+        const navLinks = document.querySelectorAll(".nav-link");
+        const sections = ["croisement", "conclusion"];
+
+        if (graphNav && firstSection && lastSection) {
+          graphNav.style.opacity = "0";
+          graphNav.style.pointerEvents = "none";
+          graphNav.style.transition = "opacity 0.3s ease-in-out";
+
+          const updateActiveLink = () => {
+            let activeSection = null;
+            for (const id of sections) {
+              const el = document.getElementById(id);
+              if (el) {
+                const r = el.getBoundingClientRect();
+                if (r.top <= 200 && r.bottom > 200) {
+                  activeSection = id;
+                  break;
+                }
+              }
+            }
+            navLinks.forEach((link) => {
+              const linkSection = link.getAttribute("data-section");
+              if (linkSection === activeSection) {
+                link.classList.remove("btn-ghost");
+                link.classList.add("btn-primary");
+              } else {
+                link.classList.remove("btn-primary");
+                link.classList.add("btn-ghost");
+              }
+            });
+          };
+
+          const checkVisibility = () => {
+            const f = firstSection.getBoundingClientRect();
+            const l = lastSection.getBoundingClientRect();
+            if (f.top <= 100 && l.bottom > 0) {
+              graphNav.style.opacity = "1";
+              graphNav.style.pointerEvents = "auto";
+            } else {
+              graphNav.style.opacity = "0";
+              graphNav.style.pointerEvents = "none";
+            }
+            updateActiveLink();
+          };
+
+          window.addEventListener("scroll", checkVisibility);
+          checkVisibility();
+        }
+      });
+    </script>
+  </section>
+</Layout>
