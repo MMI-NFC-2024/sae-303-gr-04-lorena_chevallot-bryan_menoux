@@ -1,0 +1,261 @@
+---
+import Layout from "../layouts/Layout.astro";
+import photo1 from "../assets/photo_culturel.jpg";
+import photo2 from "../assets/photo_geographie.jpg";
+import photo3 from "../assets/photo_vitalite.jpg";
+---
+
+<Layout>
+  <!-- HERO -->
+  <section class="relative overflow-hidden bg-base-100">
+    <!-- soft decor -->
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full bg-base-300 blur-3xl opacity-60"
+    >
+    </div>
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute -bottom-24 -right-24 w-[28rem] h-[28rem] rounded-full bg-secondary blur-3xl opacity-40"
+    >
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 pt-28 pb-16">
+      <div class="text-center">
+        <span
+          class="inline-flex items-center gap-2 text-xs tracking-widest uppercase text-base-content/70"
+        >
+          Synthèse générale
+        </span>
+        <h1 class="mt-3 text-4xl md:text-5xl font-extrabold text-base-content">
+          Accès à la culture : ce que révèlent les données
+        </h1>
+        <p
+          class="mt-6 max-w-3xl mx-auto text-base md:text-lg text-base-content/80 leading-relaxed"
+        >
+          Ce travail cartographique et analytique éclaire les inégalités
+          territoriales d’accès à la culture en France. En croisant données
+          sociales, économiques et culturelles, on voit que la présence de lieux
+          ne suffit pas : l’accès réel dépend de la population, du niveau de vie
+          et des acteurs capables d’animer le territoire.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MOSAÏQUE IMAGES (3 emplacements) -->
+  <section class="bg-base-100">
+    <div class="max-w-7xl mx-auto px-6 pb-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Image 1 -->
+        <figure
+          class="relative rounded-2xl overflow-hidden bg-base-200 border border-base-300 shadow-sm"
+        >
+          <!-- ⚠️ Remplace src par ton image -->
+          <img
+            src={photo1.src}
+            alt="Illustration 1 — paysage culturel"
+            class="w-full h-64 object-cover"
+          />
+        </figure>
+
+        <!-- Image 2 -->
+        <figure
+          class="relative rounded-2xl overflow-hidden bg-base-200 border border-base-300 shadow-sm"
+        >
+          <!-- ⚠️ Remplace src par ton image -->
+          <img
+            src={photo2.src}
+            alt="Illustration 2 — pratiques culturelles"
+            class="w-full h-64 object-cover"
+          />
+        </figure>
+
+        <!-- Image 3 -->
+        <figure
+          class="relative rounded-2xl overflow-hidden bg-base-200 border border-base-300 shadow-sm"
+        >
+          <!-- ⚠️ Remplace src par ton image -->
+          <img
+            src={photo3.src}
+            alt="Illustration 3 — acteurs & événementiel"
+            class="w-full h-64 object-cover"
+          />
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONSTATS CLÉS -->
+  <section class="bg-base-100">
+    <div class="max-w-7xl mx-auto px-6 py-10">
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Carte 1 -->
+        <div
+          class="rounded-2xl border border-base-300 bg-base-200 p-6 shadow-sm"
+        >
+          <div
+            class="flex items-center gap-2 text-sm text-base-content/60 mb-3"
+          >
+            <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+            Constats
+          </div>
+          <h3 class="text-xl font-semibold text-base-content mb-3">
+            Une offre inégalement répartie
+          </h3>
+          <p class="text-base-content/85 leading-relaxed">
+            Les zones rurales ou moins peuplées affichent parfois une densité
+            par habitant favorable, mais en volume absolu les infrastructures
+            restent limitées. À l’inverse, les grandes métropoles, bien
+            équipées, peinent à couvrir la demande d’une population nombreuse.
+          </p>
+        </div>
+
+        <!-- Carte 2 -->
+        <div
+          class="rounded-2xl border border-base-300 bg-base-200 p-6 shadow-sm"
+        >
+          <div
+            class="flex items-center gap-2 text-sm text-base-content/60 mb-3"
+          >
+            <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+            Constats
+          </div>
+          <h3 class="text-xl font-semibold text-base-content mb-3">
+            Le niveau de vie pèse sur les usages
+          </h3>
+          <p class="text-base-content/85 leading-relaxed">
+            Les départements les plus pauvres présentent des fréquences de
+            visite plus faibles, quelles que soient les infrastructures. Les
+            écarts sont renforcés selon les catégories sociales : la culture est
+            davantage consommée par les cadres que par les ouvriers.
+          </p>
+        </div>
+
+        <!-- Carte 3 -->
+        <div
+          class="rounded-2xl border border-base-300 bg-base-200 p-6 shadow-sm"
+        >
+          <div
+            class="flex items-center gap-2 text-sm text-base-content/60 mb-3"
+          >
+            <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+            Constats
+          </div>
+          <h3 class="text-xl font-semibold text-base-content mb-3">
+            Le rôle décisif des acteurs culturels
+          </h3>
+          <p class="text-base-content/85 leading-relaxed">
+            Là où les professionnels sont peu nombreux, l’offre peine à exister
+            ou à se renouveler. À l’inverse, certaines régions cumulent présence
+            humaine, équipements solides et programmation dense : un véritable
+            écosystème culturel s’y déploie.
+          </p>
+        </div>
+
+        <!-- Carte 4 -->
+        <div
+          class="rounded-2xl border border-base-300 bg-base-200 p-6 shadow-sm"
+        >
+          <div
+            class="flex items-center gap-2 text-sm text-base-content/60 mb-3"
+          >
+            <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
+            Constats
+          </div>
+          <h3 class="text-xl font-semibold text-base-content mb-3">
+            Patrimoine & culture vivante
+          </h3>
+          <p class="text-base-content/85 leading-relaxed">
+            Un stock patrimonial élevé peut soutenir l’événementiel
+            (attractivité, réseaux, lieux), mais le lien n’est pas automatique.
+            L’activation du patrimoine dépend des moyens humains, des
+            financements et de la stratégie territoriale.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BLOC CITATION / INSIGHT -->
+  <section class="relative bg-base-100">
+    <div class="max-w-7xl mx-auto px-6 py-10">
+      <div
+        class="rounded-3xl border border-base-300 bg-base-200 p-8 md:p-10 shadow-sm"
+      >
+        <p class="text-lg md:text-xl leading-relaxed text-base-content/90">
+          En résumé, la culture ne se résume pas à la présence de lieux : elle
+          dépend aussi des moyens humains, économiques et symboliques pour
+          l’animer. C’est dans l’articulation entre patrimoine, population,
+          infrastructures et usages que se joue véritablement l’accès à la
+          culture sur le territoire.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEVIERS D’ACTION -->
+  <section class="bg-base-100">
+    <div class="max-w-7xl mx-auto px-6 pb-24">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl md:text-3xl font-bold text-base-content">
+          Leviers d’action identifiés
+        </h2>
+        <p class="mt-2 text-base-content/70">
+          Croiser les données permet de cibler précisément où agir pour réduire
+          les écarts d’accès.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="rounded-2xl border border-base-300 bg-base-200 p-5">
+          <h3 class="font-semibold text-base-content mb-2">
+            Renforcer les équipements
+          </h3>
+          <p class="text-sm text-base-content/80">
+            Prioriser les zones à faible volume absolu et distances d’accès
+            élevées.
+          </p>
+        </div>
+        <div class="rounded-2xl border border-base-300 bg-base-200 p-5">
+          <h3 class="font-semibold text-base-content mb-2">
+            Soutenir les professionnels
+          </h3>
+          <p class="text-sm text-base-content/80">
+            Emploi, résidences, médiation : sécuriser la présence humaine
+            locale.
+          </p>
+        </div>
+        <div class="rounded-2xl border border-base-300 bg-base-200 p-5">
+          <h3 class="font-semibold text-base-content mb-2">
+            Développer l’événementiel
+          </h3>
+          <p class="text-sm text-base-content/80">
+            Activer l’attractivité, mailler les saisons, créer des rendez-vous.
+          </p>
+        </div>
+        <div class="rounded-2xl border border-base-300 bg-base-200 p-5">
+          <h3 class="font-semibold text-base-content mb-2">
+            Valoriser le patrimoine
+          </h3>
+          <p class="text-sm text-base-content/80">
+            Transformer l’héritage en ressource vivante via programmation et
+            réseaux.
+          </p>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div
+        class="mt-10 flex flex-col md:flex-row items-center justify-center gap-3"
+      >
+        <a href="/" class="btn btn-primary rounded-full px-6">
+          Retour au sommaire
+        </a>
+        <a href="/visualisation" class="btn btn-outline rounded-full px-6">
+          Revoir les visualisations
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>
