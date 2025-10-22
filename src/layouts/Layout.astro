@@ -13,34 +13,153 @@ import "../styles/global.css";
   </head>
   <body>
     <header
-      class="navbar bg-base-100 sticky top-0 z-50 shadow-lg border-b border-base-300"
+      class="navbar bg-base-100 sticky top-0 z-50 shadow-lg border-b border-base-300 px-4"
     >
       <div class="navbar-start">
-        <a href="/" class="btn btn-ghost text-xl normal-case"> Accueil </a>
+        <a href="/" class="btn btn-ghost text-xl normal-case font-bold">
+          Dynamiques Culturelles
+        </a>
       </div>
       <div class="navbar-end">
-        <ul class="menu menu-horizontal px-1 gap-2">
+        <ul class="menu menu-horizontal px-1 gap-2 hidden lg:flex">
           <li>
             <a href="/analyse_geographique" class="btn btn-ghost">
               Analyse géographique
             </a>
           </li>
           <li>
-            <a href="/acteurs" class="btn btn-ghost"> Acteurs culturels </a>
+            <a href="/acteurs-culturels" class="btn btn-ghost">
+              Acteurs culturels
+            </a>
           </li>
           <li>
-            <a href="/acces" class="btn btn-ghost"> Accès à la culture </a>
+            <a href="/acces-a-la-culture" class="btn btn-ghost">
+              Accès à la culture
+            </a>
           </li>
         </ul>
+        <button
+          id="menu-toggle"
+          class="btn btn-ghost lg:hidden ml-2"
+          aria-label="Ouvrir le menu"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
       </div>
     </header>
-    <slot />
-    <footer class="footer footer-center bg-base-200 text-base-content p-10">
-      <aside>
-        <p class="text-sm opacity-70">
+
+    <!-- Menu plein écran pour mobile/tablette -->
+    <div
+      id="fullscreen-menu"
+      class="fixed inset-0 bg-base-100 z-[100] flex flex-col lg:hidden transition-transform duration-300 ease-in-out translate-x-full"
+    >
+      <div
+        class="flex justify-between items-center p-6 border-b border-base-300"
+      >
+        <span class="text-2xl font-bold">Menu</span>
+        <button
+          id="menu-close"
+          class="btn btn-ghost btn-circle"
+          aria-label="Fermer le menu"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-8 w-8"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="flex flex-col p-8 gap-6">
+        <a
+          href="/"
+          class="text-2xl font-semibold hover:text-primary transition-colors py-4 border-b border-base-300"
+        >
+          Accueil
+        </a>
+        <a
+          href="/analyse_geographique"
+          class="text-2xl font-semibold hover:text-primary transition-colors py-4 border-b border-base-300"
+        >
+          Analyse géographique
+        </a>
+        <a
+          href="/acteurs-culturels"
+          class="text-2xl font-semibold hover:text-primary transition-colors py-4 border-b border-base-300"
+        >
+          Acteurs culturels
+        </a>
+        <a
+          href="/acces-a-la-culture"
+          class="text-2xl font-semibold hover:text-primary transition-colors py-4 border-b border-base-300"
+        >
+          Accès à la culture
+        </a>
+      </nav>
+
+      <div class="mt-auto p-8 border-t border-base-300">
+        <p class="text-sm opacity-60">
           © 2025 - Open Data University × Ministère de la Culture
         </p>
-      </aside>
-    </footer>
+      </div>
+    </div>
+
+    <slot />
   </body>
 </html>
+
+<script>
+  const menuToggle = document.getElementById("menu-toggle");
+  const menuClose = document.getElementById("menu-close");
+  const fullscreenMenu = document.getElementById("fullscreen-menu");
+
+  menuToggle?.addEventListener("click", () => {
+    fullscreenMenu?.classList.remove("translate-x-full");
+    fullscreenMenu?.classList.add("translate-x-0");
+    document.body.style.overflow = "hidden";
+  });
+
+  menuClose?.addEventListener("click", () => {
+    fullscreenMenu?.classList.remove("translate-x-0");
+    fullscreenMenu?.classList.add("translate-x-full");
+    document.body.style.overflow = "auto";
+  });
+
+  // Fermer le menu au clic sur un lien
+  const menuLinks = fullscreenMenu?.querySelectorAll("a");
+  menuLinks?.forEach((link) => {
+    link.addEventListener("click", () => {
+      fullscreenMenu?.classList.remove("translate-x-0");
+      fullscreenMenu?.classList.add("translate-x-full");
+      document.body.style.overflow = "auto";
+    });
+  });
+</script>
+
+<footer class="footer footer-center bg-base-200 text-base-content p-10">
+  <aside>
+    <p class="text-sm opacity-70">
+      © 2025 - Open Data University × Ministère de la Culture
+    </p>
+  </aside>
+</footer>
