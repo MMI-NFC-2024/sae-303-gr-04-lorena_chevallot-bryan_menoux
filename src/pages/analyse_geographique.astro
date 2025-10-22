@@ -32,29 +32,7 @@ import photo from "../assets/photo_geographie.jpg";
         </p>
 
         <!-- Boutons -->
-        <div class="flex flex-wrap gap-4 pt-4">
-          <a
-            href="https://www.data.gouv.fr/datasets/base-des-lieux-et-equipements-culturels-basilic/"
-            target="_blank"
-            class="btn btn-outline btn-primary"
-          >
-            Classement départements
-          </a>
-          <a
-            href="https://www.data.gouv.fr/datasets/collections-des-musees-de-france-base-joconde/"
-            target="_blank"
-            class="btn btn-outline btn-primary"
-          >
-            Choroplèthe de densité culturelle
-          </a>
-          <a
-            href="https://www.data.gouv.fr/datasets/collections-des-musees-de-france-base-joconde/"
-            target="_blank"
-            class="btn btn-outline btn-primary"
-          >
-            Répartition des lieux par typologie
-          </a>
-        </div>
+        <div class="flex flex-wrap gap-4 pt-4"></div>
       </div>
 
       <!-- Image droite -->
@@ -86,15 +64,35 @@ import photo from "../assets/photo_geographie.jpg";
   <!-- Section Exploration - Bloc "Explorer les données" -->
   <section class="hero bg-neutral text-neutral-content py-20">
     <div class="hero-content text-center">
-      <div class="max-w-3xl">
+      <div class="max-w-3xl flex flex-col items-center">
         <h2 class="text-4xl font-bold mb-4">Explorer les données</h2>
         <p class="text-lg opacity-80 mb-8">
           Consultez la répartition complète des équipements culturels en France
           et comparez les territoires selon leurs dynamiques culturelles.
         </p>
-        <a href="/visualisation" class="btn btn-secondary btn-lg">
-          Voir la carte interactive
-        </a>
+        <div class="flex gap-4">
+          <a
+            href="https://www.data.gouv.fr/datasets/base-des-lieux-et-equipements-culturels-basilic/"
+            target="_blank"
+            class="btn btn-secondary hover:btn-primary"
+          >
+            Classement départements
+          </a>
+          <a
+            href="https://www.data.gouv.fr/datasets/collections-des-musees-de-france-base-joconde/"
+            target="_blank"
+            class="btn btn-secondary hover:btn-primary"
+          >
+            Choroplèthe de densité culturelle
+          </a>
+          <a
+            href="https://www.data.gouv.fr/datasets/collections-des-musees-de-france-base-joconde/"
+            target="_blank"
+            class="btn btn-secondary hover:btn-primary"
+          >
+            Répartition des lieux par typologie
+          </a>
+        </div>
       </div>
     </div>
   </section>
