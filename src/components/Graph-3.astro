@@ -1,0 +1,153 @@
+---
+import * as d3 from "d3";
+import fs from "fs";
+import path from "path";
+const assetsDir = path.join(process.cwd(), "src", "assets");
+const csvText = fs.readFileSync(
+  path.join(assetsDir, "base_culturelle_nettoyee.csv"),
+  "utf8"
+);
+const baseCulturelleNettoyee = d3.csvParse(csvText);
+const populationText = fs.readFileSync(
+  path.join(assetsDir, "detail_population@2.json"),
+  "utf8"
+);
+const population = JSON.parse(populationText);
+const normalizeCode = (code: any) =>
+  String(code).trim().replace(".0", "").padStart(2, "0");
+const populationTotale = population.filter(
+  (d: any) =>
+    d["Niveau Géo"] === "Département" &&
+    d["Mesure du recensement "] === "Population" &&
+    d["Âge"]?.trim() === "Total" &&
+    d["Sexe"]?.trim() === "Total" &&
+    d["Statut conjugal"]?.trim() === "Total" &&
+    d["Catégorie de population"]?.trim() === "Total" &&
+    d["Statut d'emploi variable selon l'enquête"]?.trim() === "Total" &&
+    d["Valeur"] != null &&
+    d["Période"] === 2010
+);
+const populationParDep = d3
+  .rollups(
+    populationTotale,
+    (v: any) => d3.sum(v, (d: any) => +d["Valeur"]),
+    (d: any) => normalizeCode(d["Département"])
+  )
+  .map(([code, Population]: any) => ({
+    code,
+    departement_population: populationTotale.find(
+      (x: any) => normalizeCode(x["Département"]) === code
+    )?.["Géographie"],
+    Population,
+  }));
+const equipementsParDep = d3
+  .rollups(
+    baseCulturelleNettoyee,
+    (v: any) => ({
+      count: v.length,
+      nom: d3
+        .rollups(
+          v,
+          (x: any) => x.length,
+          (d: any) => d["Département"]?.trim()
+        )
+        .sort((a: any, b: any) => b[1] - a[1])[0][0],
+    }),
+    (d: any) => normalizeCode(d["N_Département"])
+  )
+  .map(([code, data]: any) => ({
+    code,
+    departement_culture: data.nom,
+    Lieux: data.count,
+  }));
+const tableau = equipementsParDep.map((d: any) => {
+  const pop = populationParDep.find((p: any) => p.code === d.code);
+  const popVal = pop?.Population ?? NaN;
+  return {
+    code: d.code,
+    departement_culture: d.departement_culture,
+    departement_population: pop?.departement_population ?? "absent",
+    Lieux: d.Lieux,
+    Population: popVal,
+    LieuxParHabitant: popVal ? (d.Lieux / popVal) * 10000 : NaN,
+  };
+});
+const dataOk = tableau.filter((d: any) => !isNaN(d.LieuxParHabitant));
+const top10 = d3.sort(dataOk, (d: any) => -d.LieuxParHabitant).slice(0, 10);
+const bottom10 = d3.sort(dataOk, (d: any) => d.LieuxParHabitant).slice(0, 10);
+const top10Json = JSON.stringify(top10);
+const bottom10Json = JSON.stringify(bottom10);
+---
+
+<div id="bar-chart-container">
+  <div
+    id="plot-holder-3"
+    class="flex justify-center min-h-[600px] items-center"
+  >
+    <div class="text-zinc-400">Chargement du graphique...</div>
+  </div>
+</div>
+<script type="module" define:vars={{ top10Json, bottom10Json }}>
+  (async () => {
+    const Plot = await import(
+      "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm"
+    );
+    const top10 = JSON.parse(top10Json);
+    const bottom10 = JSON.parse(bottom10Json);
+    const plotHolder = document.getElementById("plot-holder-3");
+    try {
+      const plot = Plot.plot({
+        x: {
+          label: "Équipements culturels pour 10 000 habitants",
+          grid: true,
+        },
+        y: {
+          label: null,
+          domain: [
+            ...bottom10.map((d) => d.departement_culture),
+            ...top10.map((d) => d.departement_culture),
+          ],
+        },
+        marks: [
+          Plot.barX(bottom10, {
+            x: "LieuxParHabitant",
+            y: "departement_culture",
+            fill: "#ccebc5",
+            title: (d) =>
+              `${d.departement_culture}\n${d.LieuxParHabitant.toFixed(
+                2
+              )} / 10 000 hab.`,
+          }),
+          Plot.barX(top10, {
+            x: "LieuxParHabitant",
+            y: "departement_culture",
+            fill: "#0868ac",
+            title: (d) =>
+              `${d.departement_culture}\n${d.LieuxParHabitant.toFixed(
+                2
+              )} / 10 000 hab.`,
+          }),
+          Plot.ruleX([0]),
+        ],
+        width: 900,
+        height: 600,
+        marginLeft: 180,
+      });
+      plotHolder.innerHTML = "";
+      plotHolder.appendChild(plot);
+    } catch (err) {
+      console.error("Erreur:", err);
+      plotHolder.innerHTML =
+        '<div class="text-red-400">Erreur de chargement du graphique</div>';
+    }
+  })();
+</script>
+<style>
+  #bar-chart-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+  }
+</style>
