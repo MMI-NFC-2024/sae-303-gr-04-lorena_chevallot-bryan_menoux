@@ -1,0 +1,252 @@
+---
+import * as d3 from "d3";
+import fs from "fs";
+import path from "path";
+const assetsDir = path.join(process.cwd(), "src", "assets");
+const profText = fs.readFileSync(
+  path.join(assetsDir, "professions-culturelles-departements-2017@1.csv"),
+  "utf8"
+);
+const baseText = fs.readFileSync(
+  path.join(assetsDir, "base_culturelle_nettoyee.csv"),
+  "utf8"
+);
+const parseSemicolon = d3.dsvFormat(";");
+const prof = parseSemicolon.parse(profText.replace(/\uFEFF/g, ""));
+const base = d3.csvParse(baseText);
+const normalizeCode = (c: any) => {
+  if (c == null) return null;
+  let s = String(c).trim().replace(".0", "");
+  if (s === "2A" || s === "2B") return s;
+  if (/^\d{5}$/.test(s)) s = s.slice(0, 2);
+  return s.padStart(2, "0");
+};
+const lieuxParDep = d3.rollup(
+  base
+    .map((d) => ({ dep: normalizeCode(d["N_Département"]) }))
+    .filter((d) => d.dep),
+  (v) => v.length,
+  (d) => d.dep
+);
+const acteursParDep = new Map(
+  prof.map((r: any) => [
+    normalizeCode(r["Code_insee"]),
+    +r["Nombre d'actifs exerçant une profession culturelle_2017"] || 0,
+  ])
+);
+const nomsParDep = new Map(
+  prof.map((r: any) => [
+    normalizeCode(r["Code_insee"]),
+    r["Libelle_geographique"],
+  ])
+);
+const fusion = Array.from(
+  new Set([...lieuxParDep.keys(), ...acteursParDep.keys()])
+)
+  .map((dep) => {
+    const acteurs = acteursParDep.get(dep) ?? 0;
+    const lieux = lieuxParDep.get(dep) ?? 0;
+    return {
+      Code_departement: dep,
+      Nom_departement: nomsParDep.get(dep) ?? null,
+      Nombre_acteurs_culturels: acteurs,
+      Nombre_lieux_culturels: lieux,
+      Ratio_lieux_par_acteur: acteurs > 0 ? lieux / acteurs : null,
+    };
+  })
+  .filter(
+    (d) =>
+      d.Nombre_acteurs_culturels > 0 &&
+      d.Nombre_lieux_culturels > 0 &&
+      d.Ratio_lieux_par_acteur != null
+  )
+  .sort((a, b) =>
+    d3.ascending(a.Code_departement ?? "", b.Code_departement ?? "")
+  );
+const compress = (x: number) => Math.sqrt(Math.log1p(x));
+const dataCompressed = fusion.map((d) => ({
+  ...d,
+  xComp: compress(d.Nombre_acteurs_culturels),
+  yComp: compress(d.Nombre_lieux_culturels),
+}));
+const medianActeurs = d3.median(fusion, (d) => d.Nombre_acteurs_culturels) ?? 0;
+const medianLieux = d3.median(fusion, (d) => d.Nombre_lieux_culturels) ?? 0;
+function profile(d: any) {
+  if (
+    d.Nombre_acteurs_culturels >= medianActeurs &&
+    d.Nombre_lieux_culturels >= medianLieux
+  )
+    return "Écosystème complet";
+  if (
+    d.Nombre_acteurs_culturels < medianActeurs &&
+    d.Nombre_lieux_culturels < medianLieux
+  )
+    return "Territoire sous-doté";
+  if (
+    d.Nombre_acteurs_culturels < medianActeurs &&
+    d.Nombre_lieux_culturels >= medianLieux
+  )
+    return "Tension humaine (beaucoup de lieux / peu d'acteurs)";
+  return "Potentiel latent (beaucoup d'acteurs / peu de lieux)";
+}
+const dataCat = dataCompressed.map((d) => ({ ...d, profil: profile(d) }));
+const dataCatJson = JSON.stringify(dataCat);
+const compressedMedians = JSON.stringify({
+  medianActeurs: compress(medianActeurs),
+  medianLieux: compress(medianLieux),
+});
+---
+
+<div id="map-container-8">
+  <div
+    id="plot-holder-8"
+    class="flex justify-center min-h-[700px] items-center"
+  >
+    <div class="text-zinc-400">Chargement du graphique...</div>
+  </div>
+  <div id="tooltip-8" class="tooltip"></div>
+</div>
+<style>
+  #map-container-8 {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  #plot-holder-8 {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  .tooltip {
+    display: none;
+    position: fixed;
+    background: rgba(0, 0, 0, 0.95);
+    color: white;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+    white-space: pre-line;
+    line-height: 1.6;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 1000;
+  }
+</style>
+<script type="module" define:vars={{ dataCatJson, compressedMedians }}>
+  async function renderPlot() {
+    try {
+      const Plot = await import(
+        "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm"
+      );
+      const dataCat = JSON.parse(dataCatJson);
+      const { medianActeurs, medianLieux } = JSON.parse(compressedMedians);
+      const plot = Plot.plot({
+        title:
+          "Profils culturels par département — Acteurs vs Lieux (points équilibrés)",
+        width: 900,
+        height: 700,
+        grid: true,
+        x: {
+          label: "Nombre d'acteurs culturels (compressé) →",
+          nice: true,
+        },
+        y: {
+          label: "↑ Nombre de lieux culturels (compressé)",
+          nice: true,
+        },
+        color: {
+          domain: [
+            "Écosystème complet",
+            "Territoire sous-doté",
+            "Tension humaine (beaucoup de lieux / peu d'acteurs)",
+            "Potentiel latent (beaucoup d'acteurs / peu de lieux)",
+          ],
+          range: ["#22c55e", "#ef4444", "#f59e0b", "#3b82f6"],
+          legend: true,
+        },
+        marks: [
+          Plot.ruleX([medianActeurs], {
+            stroke: "#555",
+            strokeDasharray: "4,4",
+          }),
+          Plot.ruleY([medianLieux], {
+            stroke: "#555",
+            strokeDasharray: "4,4",
+          }),
+          Plot.dot(dataCat, {
+            x: "xComp",
+            y: "yComp",
+            fill: "profil",
+            r: 5,
+            stroke: "#fff",
+            strokeWidth: 1.2,
+            opacity: 0.9,
+            title: (d) =>
+              `${d.Nom_departement ?? d.Code_departement}\n${d.Nombre_acteurs_culturels.toLocaleString()} acteurs\n${d.Nombre_lieux_culturels.toLocaleString()} lieux\nProfil : ${d.profil}`,
+          }),
+        ],
+      });
+      const plotHolder = document.getElementById("plot-holder-8");
+      const tooltip = document.getElementById("tooltip-8");
+      if (plotHolder && tooltip) {
+        plotHolder.innerHTML = "";
+        plotHolder.appendChild(plot);
+        const dots = plotHolder.querySelectorAll("circle");
+        const dotTitles = new Map();
+        dots.forEach((dot) => {
+          const titleElement = dot.querySelector("title");
+          const title = titleElement?.textContent || "";
+          dotTitles.set(dot, title);
+          if (titleElement) {
+            titleElement.remove();
+          }
+          dot.removeAttribute("aria-label");
+        });
+        dots.forEach((dot) => {
+          dot.style.cursor = "pointer";
+          dot.style.transition = "all 0.2s ease";
+          dot.addEventListener("mouseenter", (e) => {
+            const title = dotTitles.get(dot);
+            tooltip.textContent = title;
+            tooltip.style.display = "block";
+            tooltip.style.left = e.pageX + 10 + "px";
+            tooltip.style.top = e.pageY + 10 + "px";
+            dot.style.r = "8";
+            dot.style.strokeWidth = "2";
+            dot.style.filter = "brightness(1.2)";
+          });
+          dot.addEventListener("mousemove", (e) => {
+            tooltip.style.left = e.pageX + 10 + "px";
+            tooltip.style.top = e.pageY + 10 + "px";
+          });
+          dot.addEventListener("mouseleave", () => {
+            tooltip.style.display = "none";
+            dot.style.r = "5";
+            dot.style.strokeWidth = "1.2";
+            dot.style.filter = "none";
+          });
+        });
+      }
+      console.log("Graph-8 rendu avec succès");
+    } catch (error) {
+      console.error("Erreur lors du rendu du graphique 8 :", error);
+      const plotHolder = document.getElementById("plot-holder-8");
+      if (plotHolder) {
+        plotHolder.innerHTML =
+          '<div class="text-red-400">Erreur de chargement</div>';
+      }
+    }
+  }
+  renderPlot();
+</script>
