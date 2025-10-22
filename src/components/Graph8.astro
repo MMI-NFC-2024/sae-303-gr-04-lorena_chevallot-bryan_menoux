@@ -148,12 +148,10 @@ const uniqueId = `graph-8-${Math.random().toString(36).substr(2, 9)}`;
     z-index: 1000;
   }
 
-  /* wrapper */
   .scatter-frame {
     display: block;
   }
 
-  /* Légende verticale au-dessus du graphe */
   .legend-vertical {
     display: block;
     margin: 4px 0 10px 0;
@@ -177,7 +175,6 @@ const uniqueId = `graph-8-${Math.random().toString(36).substr(2, 9)}`;
 
 <script type="module" define:vars={{ dataCatJson, compressedMedians, uniqueId }}
 >
-  // debounce simple
   const debounce = (fn, ms = 120) => {
     let t;
     return (...a) => {
@@ -210,10 +207,9 @@ const uniqueId = `graph-8-${Math.random().toString(36).substr(2, 9)}`;
     );
 
     const marginLeft = isSmall ? 56 : 72;
-    const marginTop = 40; // ← AUGMENTÉ pour faire de la place au titre Y
+    const marginTop = 40; 
     const fontSize = isSmall ? 11 : 12;
 
-    // Légende verticale
     const legendDomain = [
       "Écosystème complet",
       "Territoire sous-doté",
@@ -229,7 +225,6 @@ const uniqueId = `graph-8-${Math.random().toString(36).substr(2, 9)}`;
       width: plotWidth - marginLeft,
     });
 
-    // Scatter
     const plot = Plot.plot({
       width: plotWidth,
       height: plotHeight,
@@ -249,7 +244,7 @@ const uniqueId = `graph-8-${Math.random().toString(36).substr(2, 9)}`;
         ticks: isSmall ? 6 : 8,
         tickFormat: (d) => d.toFixed(1),
         labelAnchor: "top",
-        labelOffset: 40, // ← AUGMENTÉ pour plus d'espace
+        labelOffset: 40, 
       },
       color: { domain: legendDomain, range: legendRange, legend: false },
       marks: [
@@ -278,7 +273,6 @@ Profil : ${d.profil}`,
       ],
     });
 
-    // Injection : légende au-dessus, moins à droite
     holder.innerHTML = "";
     const frame = document.createElement("div");
     frame.className = "scatter-frame";
@@ -287,8 +281,8 @@ Profil : ${d.profil}`,
     const legendRow = document.createElement("div");
     legendRow.className = "legend-vertical";
 
-    // PAD réduit pour que la légende soit moins décalée (un peu avant le bord de l'axe)
-    const LEGEND_SHIFT = isSmall ? 10 : 14; // ~ à ajuster si besoin
+    
+    const LEGEND_SHIFT = isSmall ? 10 : 14; 
     legendRow.style.paddingLeft = Math.max(0, marginLeft - LEGEND_SHIFT) + "px";
 
     const legendTitle = document.createElement("div");
@@ -302,7 +296,6 @@ Profil : ${d.profil}`,
     frame.appendChild(plot);
     holder.appendChild(frame);
 
-    // Tooltips
     const dots = holder.querySelectorAll("circle");
     const titles = new Map();
     dots.forEach((dot) => {
@@ -334,7 +327,6 @@ Profil : ${d.profil}`,
     });
   }
 
-  // Premier rendu + responsive
   (async () => {
     await renderScatter();
     const container = document.querySelector(`[data-graph-id="${uniqueId}"]`);

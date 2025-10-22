@@ -201,6 +201,10 @@ const uniqueId = `graph-3-${Math.random().toString(36).substr(2, 9)}`;
     padding: 1rem;
   }
 
+  .graph-container :global(svg text) {
+    font-size: 15px !important;
+  }
+
   .tooltip {
     position: fixed;
     display: none;

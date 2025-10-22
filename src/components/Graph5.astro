@@ -5,7 +5,6 @@ import path from "path";
 
 const assetsDir = path.join(process.cwd(), "src", "assets");
 
-// Données
 const entreesMuseeText = fs.readFileSync(
   path.join(assetsDir, "ENTREES_ET_CATEGORIES_DE_PUBLIC@2.csv"),
   "utf8"
@@ -30,7 +29,6 @@ const geoText = fs.readFileSync(
 );
 const france = JSON.parse(geoText);
 
-// Utils
 const normalizeCode = (code: any) => {
   if (code == null) return null;
   let c = String(code).trim().replace(".0", "");
@@ -41,7 +39,6 @@ const normalizeCode = (code: any) => {
 const altCorse = (code: string) =>
   code === "2A" || code === "2B" ? "20" : code;
 
-// Prépa population
 const populationFiltre = population.filter(
   (d: any) =>
     d["Niveau Géo"] === "Département" &&
@@ -64,7 +61,6 @@ const popMap = new Map(
   }).filter(Boolean) as any
 );
 
-// Prépa pauvreté
 const pauvMap = new Map(
   indicePauvrete.map((d: any) => [
     normalizeCode(d.code_departement),
@@ -72,7 +68,6 @@ const pauvMap = new Map(
   ])
 );
 
-// Prépa musées
 const museeMap = new Map();
 musees.forEach((d: any) => {
   const code = normalizeCode(d.code_departement);
@@ -83,7 +78,6 @@ musees.forEach((d: any) => {
   museeMap.set(code, (museeMap.get(code) || 0) + total);
 });
 
-// Merge
 const dataFinale = france.features.map((f: any) => {
   const code = normalizeCode(f.properties.code);
   const pop = code
@@ -202,7 +196,6 @@ const uniqueId = `graph-5-${Math.random().toString(36).substr(2, 9)}`;
     function render() {
       const { plotWidth, plotHeight } = computeDims();
 
-      // On laisse Plot sans 'title' interne et on met le titre au-dessus en HTML
       const mapPauvrete = Plot.plot({
         projection: { type: "mercator", domain: france },
         color: { scheme: "Reds", label: "Taux de pauvreté (%)" },
@@ -263,10 +256,8 @@ const uniqueId = `graph-5-${Math.random().toString(36).substr(2, 9)}`;
       attachTooltips(plotHolder);
     }
 
-    // Premier rendu
     render();
 
-    // Re-rendu quand la taille du conteneur change
     const ro = new ResizeObserver(() => render());
     ro.observe(plotHolder);
     window.addEventListener("orientationchange", render);
@@ -280,27 +271,26 @@ const uniqueId = `graph-5-${Math.random().toString(36).substr(2, 9)}`;
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
+
+  .plot-holder :global(svg text) {
+    font-size: 15px !important;
+  }
+
   @media (min-width: 768px) {
     .plot-holder {
-      grid-template-columns: 1fr 1fr; /* 2 colonnes dès md */
+      grid-template-columns: 1fr 1fr;
     }
   }
 
-  /* Card sobre autour de chaque carte */
   .map-card {
-    background: oklch(98% 0 0); /* très léger gris */
+    background: oklch(98% 0 0);
     border: 1px solid oklch(92% 0 0);
     border-radius: 14px;
     padding: 14px 14px 10px;
   }
 
-  /* Titre */
   .map-title {
-    font-family:
-      "Red Hat Display",
-      system-ui,
-      -apple-system,
-      sans-serif;
+    font-family: "Red Hat Display", system-ui, -apple-system, sans-serif;
     font-weight: 700;
     font-size: 1.05rem;
     line-height: 1.35;
@@ -309,7 +299,6 @@ const uniqueId = `graph-5-${Math.random().toString(36).substr(2, 9)}`;
     text-align: center;
   }
 
-  /* Légende dense, centrée, séparée */
   .map-legend {
     display: flex;
     justify-content: center;
@@ -320,7 +309,6 @@ const uniqueId = `graph-5-${Math.random().toString(36).substr(2, 9)}`;
     max-width: 100%;
   }
 
-  /* Figure (svg) */
   .map-figure {
     display: flex;
     justify-content: center;
@@ -330,7 +318,6 @@ const uniqueId = `graph-5-${Math.random().toString(36).substr(2, 9)}`;
     height: auto;
   }
 
-  /* Tooltip (identique) */
   .tooltip {
     display: none;
     position: fixed;
@@ -340,10 +327,7 @@ const uniqueId = `graph-5-${Math.random().toString(36).substr(2, 9)}`;
     border-radius: 6px;
     font-size: 15px;
     font-weight: 600;
-    font-family:
-      system-ui,
-      -apple-system,
-      sans-serif;
+    font-family: system-ui, -apple-system, sans-serif;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     pointer-events: none;
     white-space: pre-line;

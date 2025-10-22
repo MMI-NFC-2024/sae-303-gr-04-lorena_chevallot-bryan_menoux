@@ -12,4 +12,15 @@
 Décrire ici les éléments techniques remarquables de votre site (interactions, navigation, responsive, accessibilité...).
 Idéalement avec des liens vers votre site et/ou [votre code](https://github.blog/news-insights/product-news/relative-links-in-markup-files/)
 
+# Groupe 04 :
+
 Nous avons modifiés quelques éléments dans nos commits après 17h avec l'autorisation de Mr Pracht afin de terminer quelques élements tel que la mise en page des graphiques pour avoir une meilleure lecture.
+
+Remarques :
+
+- Certaines cartes sont longues à charger, notamment celles de la page analyse_geographique. Cependant elles sont fonctionnelles, il suffit d'attendre quelques secondes que les données se chargent.
+
+Éléments remarquables :
+
+- Nous avons essayé de faire un travail sur l'ésthétisme de sorte à faire un site accessible au maximum.
+- Nous avons fais en sorte que les graphiques soient tous intéractif avec des informations au survol et certains un peu plus intéractifs.

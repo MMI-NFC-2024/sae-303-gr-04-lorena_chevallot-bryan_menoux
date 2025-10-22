@@ -55,6 +55,11 @@ const uniqueId = `graph-6-${Math.random().toString(36).substr(2, 9)}`;
     -moz-user-select: none;
     -ms-user-select: none;
   }
+
+  .graph-container :global(svg text) {
+    font-size: 15px !important;
+  }
+
   .plot-holder {
     user-select: none;
     -webkit-user-select: none;
@@ -93,7 +98,6 @@ const uniqueId = `graph-6-${Math.random().toString(36).substr(2, 9)}`;
     border: 1px solid rgba(255, 255, 255, 0.2);
     z-index: 1000;
   }
-  /* Aligne parfaitement la légende au-dessus des cellules */
   .heatmap-frame {
     display: block;
   }
@@ -103,7 +107,7 @@ const uniqueId = `graph-6-${Math.random().toString(36).substr(2, 9)}`;
   }
   .legend-row svg {
     display: block;
-  } /* évite les espaces inline */
+  } 
 </style>
 <script type="module" define:vars={{ tidyJson, uniqueId }}>
   const tidy = JSON.parse(tidyJson);
@@ -122,26 +126,22 @@ const uniqueId = `graph-6-${Math.random().toString(36).substr(2, 9)}`;
 
       const maxValue = d3.max(tidy, (d) => d.Valeur);
 
-      // Dimensions + marges (identiques au plot)
       const plotWidth = 750;
       const plotHeight = 400;
-      const marginLeft = 190; // même valeur que ton plot
-      const marginBottom = 120; // idem
+      const marginLeft = 190; 
+      const marginBottom = 120; 
 
-      // Échelle partagée
       const colorScale = {
         scheme: "YlGnBu",
         label: "Taux (%)",
         domain: [0, maxValue],
       };
 
-      // Légende : largeur = largeur des cellules (sans la marge gauche)
       const legend = Plot.legend({
         color: colorScale,
         width: plotWidth - marginLeft,
       });
 
-      // Heatmap (sans légende intégrée)
       const heatmap = Plot.plot({
         marginTop: 4,
         marginLeft,
@@ -170,7 +170,6 @@ const uniqueId = `graph-6-${Math.random().toString(36).substr(2, 9)}`;
         height: plotHeight,
       });
 
-      // Injection : on crée un wrapper de la largeur du plot, avec padding-left = marginLeft
       holder.innerHTML = "";
       const frame = document.createElement("div");
       frame.className = "heatmap-frame";
@@ -178,14 +177,13 @@ const uniqueId = `graph-6-${Math.random().toString(36).substr(2, 9)}`;
 
       const legendRow = document.createElement("div");
       legendRow.className = "legend-row";
-      legendRow.style.paddingLeft = marginLeft + "px"; // aligne la légende avec les cellules
+      legendRow.style.paddingLeft = marginLeft + "px"; 
       legendRow.appendChild(legend);
 
       frame.appendChild(legendRow);
       frame.appendChild(heatmap);
       holder.appendChild(frame);
 
-      // Tooltips
       const cells = holder.querySelectorAll("rect");
       const cellTitles = new Map();
       cells.forEach((cell) => {
@@ -219,9 +217,7 @@ const uniqueId = `graph-6-${Math.random().toString(36).substr(2, 9)}`;
         });
       });
 
-      // rAF pour assurer la mise en page au premier paint (évite un léger décalage)
       requestAnimationFrame(() => {
-        // rien de plus à faire ici, mais garde la possibilité de tweaks si besoin
       });
     } catch (e) {
       console.error("Erreur heatmap/legend:", e);

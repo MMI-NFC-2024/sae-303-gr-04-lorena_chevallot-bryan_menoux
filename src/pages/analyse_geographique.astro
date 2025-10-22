@@ -7,19 +7,16 @@ import Graph3 from "../components/Graph3.astro";
 ---
 
 <style>
-  /* Style pour le point blanc quand le lien est actif */
   .nav-link.btn-primary .nav-dot {
     background-color: white !important;
   }
 </style>
 
 <Layout>
-  <!-- Section d'intro -->
   <section class="hero min-h-screen bg-base-100">
     <div
       class="hero-content flex-col lg:flex-row gap-12 max-w-7xl h-full flex items-start pt-48 justify-center"
     >
-      <!-- Texte gauche -->
       <div class="lg:w-1/2 flex flex-col justify-center">
         <h1 class="text-5xl font-bold text-base-content">
           Géographie de l'offre culturelle en France
@@ -41,11 +38,9 @@ import Graph3 from "../components/Graph3.astro";
           et de commencer à identifier les territoires moins bien desservis.
         </p>
 
-        <!-- Boutons -->
         <div class="flex flex-wrap gap-4 pt-4"></div>
       </div>
 
-      <!-- Image droite -->
       <div class="card bg-base-200 shadow-xl lg:w-2/3 lg:h-1/2 p-0 rounded-xl">
         <div
           class="card-body items-center justify-center h-full p-0 rounded-xl"
@@ -59,7 +54,6 @@ import Graph3 from "../components/Graph3.astro";
       </div>
     </div>
 
-    <!-- Indicateur scroll -->
     <div
       class="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center"
     >
@@ -71,7 +65,6 @@ import Graph3 from "../components/Graph3.astro";
     </div>
   </section>
 
-  <!-- Section Exploration - Bloc "Explorer les données" -->
   <section class="hero bg-neutral text-neutral-content py-20">
     <div class="hero-content text-center">
       <div class="max-w-3xl flex flex-col items-center">
@@ -95,7 +88,6 @@ import Graph3 from "../components/Graph3.astro";
     </div>
   </section>
 
-  <!-- Menu latéral de navigation -->
   <aside
     class="hidden lg:block fixed left-4 top-1/2 -translate-y-1/2 z-40"
     id="graphNav"
@@ -143,12 +135,10 @@ import Graph3 from "../components/Graph3.astro";
     </div>
   </aside>
 
-  <!-- Section Analyse : Densité par département -->
   <section id="densite" class="relative py-24 px-6 bg-base-100">
     <div
       class="max-w-[75dvw] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
     >
-      <!-- Graphique à gauche -->
       <div class="relative">
         <div
           class="relative card bg-base-200 shadow-xl rounded-2xl overflow-hidden"
@@ -168,7 +158,6 @@ import Graph3 from "../components/Graph3.astro";
         </div>
       </div>
 
-      <!-- Explication à droite -->
       <aside class="space-y-6 lg:sticky gap-6 lg:top-24">
         <div class="inline-flex items-center gap-2">
           <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
@@ -218,12 +207,10 @@ import Graph3 from "../components/Graph3.astro";
     </div>
   </section>
 
-  <!-- Section Analyse : Filtrage par type de lieu (musées, bibliothèques, cinémas...) -->
   <section id="carte" class="relative py-24 px-6 bg-base-100">
     <div
       class="max-w-[75dvw] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
     >
-      <!-- Graphique à gauche -->
       <div class="relative">
         <div
           class="absolute -inset-2 rounded-2xl bg-gradient-to-br from-base-300 to-base-200 opacity-60 blur-md"
@@ -247,7 +234,6 @@ import Graph3 from "../components/Graph3.astro";
         </div>
       </div>
 
-      <!-- Explication à droite -->
       <aside class="space-y-6 lg:sticky gap-6 lg:top-24">
         <div class="inline-flex items-center gap-2">
           <div class="w-2.5 h-2.5 rounded-full bg-secondary"></div>
@@ -302,12 +288,10 @@ import Graph3 from "../components/Graph3.astro";
     </div>
   </section>
 
-  <!-- Section Analyse : Classement des 10 départements les mieux et les moins bien dotés en lieux culturels par habitant -->
   <section id="classement" class="relative py-24 px-6 bg-base-100">
     <div
       class="max-w-[75dvw] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
     >
-      <!-- Graphique à gauche -->
       <div class="relative">
         <div
           class="absolute -inset-2 rounded-2xl bg-gradient-to-br from-base-300 to-base-200 opacity-60 blur-md"
@@ -331,7 +315,6 @@ import Graph3 from "../components/Graph3.astro";
         </div>
       </div>
 
-      <!-- Explication à droite -->
       <aside class="space-y-6 lg:sticky gap-6 lg:top-24">
         <div class="inline-flex items-center gap-2">
           <div class="w-2.5 h-2.5 rounded-full bg-secondary"></div>
@@ -394,12 +377,10 @@ import Graph3 from "../components/Graph3.astro";
     </div>
   </section>
 
-  <!-- Section Conclusion -->
   <section
     id="conclusion"
     class="relative py-32 px-6 bg-gradient-to-br from-base-100 via-base-200 to-base-100 overflow-hidden"
   >
-    <!-- Éléments décoratifs d'arrière-plan -->
     <div
       class="absolute top-0 right-0 w-96 h-96 bg-primary opacity-5 rounded-full blur-3xl -mr-48 -mt-48"
     >
@@ -410,7 +391,6 @@ import Graph3 from "../components/Graph3.astro";
     </div>
 
     <div class="max-w-4xl mx-auto relative z-10">
-      <!-- En-tête -->
       <div class="text-center mb-12">
         <div class="inline-flex items-center gap-3 mb-6">
           <div class="h-1 w-12 bg-primary"></div>
@@ -427,7 +407,6 @@ import Graph3 from "../components/Graph3.astro";
         </h2>
       </div>
 
-      <!-- Contenu principal -->
       <div class="space-y-8 text-lg leading-relaxed">
         <p class="text-base-content opacity-90">
           Ces trois visualisations permettent de dresser un
@@ -439,9 +418,7 @@ import Graph3 from "../components/Graph3.astro";
           un enjeu d'accessibilité réelle.
         </p>
 
-        <!-- Points clés -->
         <div class="grid md:grid-cols-2 gap-6">
-          <!-- Point 1 -->
           <div
             class="bg-base-300 bg-opacity-50 rounded-xl p-6 border-l-4 border-primary"
           >
@@ -461,7 +438,6 @@ import Graph3 from "../components/Graph3.astro";
             </p>
           </div>
 
-          <!-- Point 2 -->
           <div
             class="bg-base-300 bg-opacity-50 rounded-xl p-6 border-l-4 border-primary"
           >
@@ -480,7 +456,6 @@ import Graph3 from "../components/Graph3.astro";
             </p>
           </div>
 
-          <!-- Point 3 -->
           <div
             class="bg-base-300 bg-opacity-50 rounded-xl p-6 border-l-4 border-accent md:col-span-2"
           >
@@ -501,7 +476,6 @@ import Graph3 from "../components/Graph3.astro";
           </div>
         </div>
 
-        <!-- Synthèse -->
         <div
           class="bg-base-300 bg-opacity-50 rounded-2xl p-8 border border-primary/20"
         >
@@ -542,10 +516,8 @@ import Graph3 from "../components/Graph3.astro";
         </a>
       </div>
     </div>
-    <!-- Bouton d'action -->
 
     <script>
-      // Script pour afficher/masquer le menu latéral selon le scroll et gérer la section active
       document.addEventListener("DOMContentLoaded", () => {
         const graphNav = document.getElementById("graphNav");
         const firstSection = document.getElementById("densite");
@@ -554,19 +526,16 @@ import Graph3 from "../components/Graph3.astro";
         const sections = ["densite", "carte", "classement", "conclusion"];
 
         if (graphNav && firstSection && lastSection) {
-          // Masquer initialement
           graphNav.style.opacity = "0";
           graphNav.style.pointerEvents = "none";
           graphNav.style.transition = "opacity 0.3s ease-in-out";
 
           const updateActiveLink = () => {
-            // Trouver quelle section est visible
             let activeSection = null;
             for (const sectionId of sections) {
               const section = document.getElementById(sectionId);
               if (section) {
                 const rect = section.getBoundingClientRect();
-                // Section active si son top est proche du haut de la fenêtre
                 if (rect.top <= 200 && rect.bottom > 200) {
                   activeSection = sectionId;
                   break;
@@ -574,7 +543,6 @@ import Graph3 from "../components/Graph3.astro";
               }
             }
 
-            // Mettre à jour les styles des liens
             navLinks.forEach((link) => {
               const linkSection = link.getAttribute("data-section");
               if (linkSection === activeSection) {
@@ -591,8 +559,6 @@ import Graph3 from "../components/Graph3.astro";
             const firstRect = firstSection.getBoundingClientRect();
             const lastRect = lastSection.getBoundingClientRect();
 
-            // Afficher uniquement si la section densité a commencé (top < viewport)
-            // ET qu'on n'a pas dépassé la dernière section
             if (firstRect.top <= 100 && lastRect.bottom > 0) {
               graphNav.style.opacity = "1";
               graphNav.style.pointerEvents = "auto";
@@ -601,12 +567,11 @@ import Graph3 from "../components/Graph3.astro";
               graphNav.style.pointerEvents = "none";
             }
 
-            // Mettre à jour le lien actif
             updateActiveLink();
           };
 
           window.addEventListener("scroll", checkVisibility);
-          checkVisibility(); // Vérifier au chargement
+          checkVisibility();
         }
       });
     </script>

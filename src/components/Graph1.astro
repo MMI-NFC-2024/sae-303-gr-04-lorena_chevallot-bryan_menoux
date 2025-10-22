@@ -49,14 +49,12 @@ const uniqueId = `graph-1-${Math.random().toString(36).substr(2, 9)}`;
   class="graph-container w-full flex flex-col items-center"
   data-graph-id={uniqueId}
 >
-  <!-- Légende au-dessus -->
   <div class="legend-holder w-full flex flex-col items-center mb-4">
     <div class="text-base-content opacity-50 p-2">
       Chargement de la légende...
     </div>
   </div>
 
-  <!-- Carte -->
   <div class="plot-holder w-full flex flex-col items-center">
     <div class="text-base-content opacity-50 p-4">
       Chargement de la carte...
@@ -88,14 +86,12 @@ const uniqueId = `graph-1-${Math.random().toString(36).substr(2, 9)}`;
       const plotWidth = Math.min(containerWidth - 40, 1000);
       const plotHeight = Math.max(plotWidth * 0.8, 600);
 
-      // Échelle de couleurs commune aux deux (carte + légende)
       const colorScale = {
         type: "threshold",
         domain: [200, 500, 1000, 1250, 1500, 2000, 2500],
         scheme: "YlGnBu",
       };
 
-      // Légende indépendante, placée AU-DESSUS
       const legend = Plot.legend({
         color: {
           ...colorScale,
@@ -104,16 +100,14 @@ const uniqueId = `graph-1-${Math.random().toString(36).substr(2, 9)}`;
         width: plotWidth,
       });
 
-      // Nettoyer et insérer la légende
       legendHolder.innerHTML = "";
       legendHolder.appendChild(legend);
 
-      // Graphique sans légende intégrée
       const plot = Plot.plot({
         projection: { type: "mercator", domain: departements },
         color: {
           ...colorScale,
-          legend: false, // <-- désactive la légende intégrée (sinon elle part sur le côté)
+          legend: false,
         },
         marks: [
           Plot.geo(departements, {
@@ -144,11 +138,9 @@ const uniqueId = `graph-1-${Math.random().toString(36).substr(2, 9)}`;
         marginRight: 20,
       });
 
-      // Insérer la carte
       plotHolder.innerHTML = "";
       plotHolder.appendChild(plot);
 
-      // Tooltips enrichis
       const paths = plotHolder.querySelectorAll("path");
       paths.forEach((path) => {
         const title =
@@ -201,6 +193,11 @@ const uniqueId = `graph-1-${Math.random().toString(36).substr(2, 9)}`;
     overflow: visible;
     padding: 1rem;
   }
+
+  .graph-container :global(svg text) {
+    font-size: 15px !important;
+  }
+
   .legend-holder {
     width: 100%;
     display: flex;

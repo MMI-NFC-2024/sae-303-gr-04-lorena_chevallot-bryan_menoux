@@ -67,6 +67,11 @@ const scaleParams = JSON.stringify({ min, seuil });
     width: 100%;
     height: 650px;
   }
+
+  #map-container-7 :global(svg text) {
+    font-size: 15px !important;
+  }
+
   #map-holder-7 {
     width: 100%;
     height: 100%;
@@ -183,7 +188,6 @@ const scaleParams = JSON.stringify({ min, seuil });
       };
       legend.addTo(map);
 
-      // Redimensionner la carte quand la fenêtre change
       window.addEventListener("resize", () => {
         map.invalidateSize();
       });
