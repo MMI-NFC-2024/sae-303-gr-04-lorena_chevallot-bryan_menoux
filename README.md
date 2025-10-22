@@ -11,3 +11,6 @@
 
 Décrire ici les éléments techniques remarquables de votre site (interactions, navigation, responsive, accessibilité...).
 Idéalement avec des liens vers votre site et/ou [votre code](https://github.blog/news-insights/product-news/relative-links-in-markup-files/)
+
+
+Nous avons modifiés quelques éléments dans nos commits après 17h avec l'autorisation de Mr Pracht afin de terminer quelques élements tel que la mise en page des graphiques pour avoir une meilleure lecture. 

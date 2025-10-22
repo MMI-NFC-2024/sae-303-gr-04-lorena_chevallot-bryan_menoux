@@ -1,6 +1,7 @@
 ---
 import { readFile } from "node:fs/promises";
 import * as d3 from "d3";
+
 const baseCulturelleText = await readFile(
   "./src/assets/base_culturelle_nettoyee.csv",
   "utf-8"
@@ -9,20 +10,24 @@ let patrimoine = d3.dsvFormat(";").parse(baseCulturelleText);
 if (Object.keys(patrimoine[0]).length === 1) {
   patrimoine = d3.dsvFormat(",").parse(baseCulturelleText);
 }
+
 const festivalsText = await readFile(
   "./src/assets/festivals-global-festivals-pl.csv",
   "utf-8"
 );
 const festivalsData = d3.dsvFormat(";").parse(festivalsText);
+
 const keyType =
   Object.keys(patrimoine[0]).find((k) => k.toLowerCase().includes("type")) ??
   "Type équipement ou lieu";
 const keyRegion =
   Object.keys(patrimoine[0]).find((k) => k.toLowerCase().includes("région")) ??
   "Région";
+
 const monuments = patrimoine.filter(
   (d) => d[keyType]?.trim() === "Monument" && d[keyRegion]
 );
+
 const monumentsParRegion = d3.rollup(
   monuments,
   (v) => v.length,
@@ -178,7 +183,6 @@ const maxValue = d3.max(fusion, (d) => Math.max(d.monuments, d.festivals)) || 0;
 
 const fusionJson = JSON.stringify(fusion);
 const maxValueJson = JSON.stringify(maxValue);
-
 const uniqueId = `graph-9-${Math.random().toString(36).substr(2, 9)}`;
 ---
 
@@ -196,17 +200,35 @@ const uniqueId = `graph-9-${Math.random().toString(36).substr(2, 9)}`;
     align-items: center;
     padding: 2rem 0;
   }
-
   .plot-holder {
     width: 100%;
     max-width: 1000px;
   }
-
+  .title-row {
+    display: block;
+    text-align: left;
+    margin-bottom: 6px;
+    font-weight: 700;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
+    font-size: 1.1rem;
+    color: oklch(22% 0 0);
+  }
+  .legend-row {
+    display: block;
+    text-align: left;
+    margin: 0 0 10px 0;
+  }
+  .legend-row svg {
+    display: block;
+  }
   .tooltip {
     position: fixed;
     display: none;
     background: rgba(0, 0, 0, 0.95);
-    color: white;
+    color: #fff;
     padding: 10px 14px;
     border-radius: 6px;
     font-size: 15px;
@@ -222,23 +244,19 @@ const uniqueId = `graph-9-${Math.random().toString(36).substr(2, 9)}`;
     border: 1px solid rgba(255, 255, 255, 0.2);
     z-index: 1000;
   }
-
   :global(.graph-container .plot-holder svg) {
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
   }
-
   :global(.graph-container .plot-holder text) {
     pointer-events: none;
   }
-
   :global(.graph-container .plot-holder rect) {
     cursor: pointer;
     transition: all 0.2s ease;
   }
-
   :global(.graph-container .plot-holder rect:hover) {
     filter: brightness(1.15);
   }
@@ -250,16 +268,33 @@ const uniqueId = `graph-9-${Math.random().toString(36).substr(2, 9)}`;
       const Plot = await import(
         "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm"
       );
-
       const fusion = JSON.parse(fusionJson);
       const maxValue = JSON.parse(maxValueJson);
 
+      const container = document.querySelector(`[data-graph-id="${uniqueId}"]`);
+      const plotHolder = container?.querySelector(".plot-holder");
+      const tooltip = container?.querySelector(".tooltip");
+
+      const holderWidth = Math.round(
+        plotHolder?.getBoundingClientRect()?.width || 1000
+      );
+      const width = Math.min(holderWidth, 1000);
+      const height = 600;
+      const marginLeft = 220;
+      const marginRight = 100;
+
+      const colorCfg = {
+        domain: ["Monuments historiques", "Festivals"],
+        range: ["#dc2626", "#2563eb"],
+        label: "Catégories",
+      };
+
+      const legend = Plot.legend({ color: colorCfg, width });
       const plot = Plot.plot({
-        subtitle: "Monuments historiques ←→ Festivals",
-        width: 1000,
-        height: 600,
-        marginLeft: 220,
-        marginRight: 100,
+        width,
+        height,
+        marginLeft,
+        marginRight,
         x: {
           label: "← Monuments historiques | Festivals →",
           domain: [-maxValue * 1.15, maxValue * 1.15],
@@ -270,19 +305,20 @@ const uniqueId = `graph-9-${Math.random().toString(36).substr(2, 9)}`;
           label: null,
           domain: fusion.map((d) => d.region),
         },
+        color: { ...colorCfg, legend: false },
         marks: [
           Plot.ruleX([0], { stroke: "#374151", strokeWidth: 2 }),
           Plot.barX(fusion, {
             x: (d) => -Math.abs(d.monuments),
             y: "region",
-            fill: "#dc2626",
+            fill: colorCfg.range[0],
             title: (d) =>
               `${d.region}\nMonuments : ${d.monuments.toLocaleString()}`,
           }),
           Plot.barX(fusion, {
             x: (d) => Math.abs(d.festivals),
             y: "region",
-            fill: "#2563eb",
+            fill: colorCfg.range[1],
             title: (d) =>
               `${d.region}\nFestivals : ${d.festivals.toLocaleString()}`,
           }),
@@ -292,7 +328,7 @@ const uniqueId = `graph-9-${Math.random().toString(36).substr(2, 9)}`;
             text: (d) => d.monuments.toLocaleString(),
             dx: -8,
             textAnchor: "end",
-            fill: "#dc2626",
+            fill: colorCfg.range[0],
             fontSize: 11,
             fontWeight: "600",
           }),
@@ -302,61 +338,50 @@ const uniqueId = `graph-9-${Math.random().toString(36).substr(2, 9)}`;
             text: (d) => d.festivals.toLocaleString(),
             dx: 8,
             textAnchor: "start",
-            fill: "#2563eb",
+            fill: colorCfg.range[1],
             fontSize: 11,
             fontWeight: "600",
           }),
         ],
       });
 
-      const container = document.querySelector(`[data-graph-id="${uniqueId}"]`);
-      const plotHolder = container?.querySelector(".plot-holder");
-      const tooltip = container?.querySelector(".tooltip");
-
       if (plotHolder && tooltip) {
         plotHolder.innerHTML = "";
+        const titleRow = document.createElement("div");
+        titleRow.className = "title-row";
+        titleRow.textContent = "Monuments historiques ←→ Festivals";
+        const legendRow = document.createElement("div");
+        legendRow.className = "legend-row";
+        legendRow.appendChild(legend);
+        plotHolder.appendChild(titleRow);
+        plotHolder.appendChild(legendRow);
         plotHolder.appendChild(plot);
 
         const bars = plotHolder.querySelectorAll("rect");
-
         const barTitles = new Map();
         bars.forEach((bar) => {
-          const titleElement = bar.querySelector("title");
-          const title = titleElement?.textContent || "";
-          barTitles.set(bar, title);
-
-          if (titleElement) {
-            titleElement.remove();
-          }
+          const t = bar.querySelector("title");
+          barTitles.set(bar, t?.textContent || "");
+          if (t) t.remove();
           bar.removeAttribute("aria-label");
-        });
-
-        bars.forEach((bar) => {
-          bar.style.cursor = "pointer";
-
           bar.addEventListener("mouseenter", (e) => {
-            const title = barTitles.get(bar);
-
-            tooltip.textContent = title;
+            tooltip.textContent = barTitles.get(bar);
             tooltip.style.display = "block";
             tooltip.style.left = e.clientX + 10 + "px";
             tooltip.style.top = e.clientY + 10 + "px";
           });
-
           bar.addEventListener("mousemove", (e) => {
             tooltip.style.left = e.clientX + 10 + "px";
             tooltip.style.top = e.clientY + 10 + "px";
           });
-
           bar.addEventListener("mouseleave", () => {
             tooltip.style.display = "none";
           });
         });
       }
-    } catch (error) {
-      console.error("Erreur lors du rendu du graphique:", error);
+    } catch (e) {
+      console.error("Erreur lors du rendu du graphique:", e);
     }
   }
-
   renderPlot();
 </script>

@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import photo from "../assets/photo_geographie.jpg";
-import Graph1 from "../components/Graph1.astro";
+import photo from "../assets/photo_vitalite.jpg";
+import Graph9 from "../components/Graph9.astro";
 ---
 
 <style>
@@ -14,7 +14,7 @@ import Graph1 from "../components/Graph1.astro";
   <!-- Section d'intro -->
   <section class="hero min-h-screen bg-base-100">
     <div
-      class="hero-content flex-col lg:flex-row gap-12 max-w-7xl h-full flex items-start pt-48 justify-center"
+      class="hero-content flex-col lg:flex-row gap-12 max-w-7xl flex items-center justify-center"
     >
       <!-- Texte gauche -->
       <div class="lg:w-1/2 flex flex-col justify-center">
@@ -40,26 +40,19 @@ import Graph1 from "../components/Graph1.astro";
         </p>
 
         <!-- Boutons -->
-        <div class="flex flex-wrap gap-4 pt-4">
-          <a href="#croisement" class="btn btn-secondary hover:btn-primary">
-            Monuments vs Festivals — Comparatif régional
-          </a>
-          <a href="#conclusion" class="btn btn-ghost">
-            Aller à la conclusion
-          </a>
-        </div>
+        <div class="flex flex-wrap gap-4 pt-4"></div>
       </div>
 
       <!-- Image droite -->
-      <div class="card bg-base-200 shadow-xl lg:w-2/3 lg:h-1/2 p-0 rounded-xl">
-        <div
-          class="card-body items-center justify-center h-full p-0 rounded-xl"
-        >
-          <img
-            src={photo.src}
-            alt="Photographie d'un paysage"
-            class="rounded-xl"
-          />
+      <div class="lg:w-1/2 w-full">
+        <div class="card bg-base-200 shadow-xl p-0 rounded-xl h-full">
+          <figure class="h-full">
+            <img
+              src={photo.src}
+              alt="Photographie d'un paysage"
+              class="rounded-xl w-full h-full object-cover min-h-[400px]"
+            />
+          </figure>
         </div>
       </div>
     </div>
@@ -91,7 +84,7 @@ import Graph1 from "../components/Graph1.astro";
           title="Monuments vs Festivals"
         >
           <span class="nav-dot w-2 h-2 rounded-full bg-primary"></span>
-          <span class="text-xs">Comparatif</span>
+          <span class="text-xs">Croisement</span>
         </a>
         <a
           href="#conclusion"
@@ -106,10 +99,32 @@ import Graph1 from "../components/Graph1.astro";
     </div>
   </aside>
 
+  <!-- Section Exploration - Bloc "Explorer les données" -->
+  <section class="hero bg-neutral text-neutral-content py-20">
+    <div class="hero-content text-center">
+      <div class="max-w-3xl flex flex-col items-center">
+        <h2 class="text-4xl font-bold mb-4">Explorer les données</h2>
+        <p class="text-lg opacity-80 mb-8">
+          Découvrez le croisement entre richesse patrimoniale et dynamisme
+          événementiel pour comprendre comment les territoires activent leur
+          capital culturel.
+        </p>
+        <div class="flex gap-4 flex-wrap">
+          <a href="#croisement" class="btn btn-secondary hover:btn-primary">
+            Croisement entre richesse patrimoniale et offre événementielle
+          </a>
+          <a href="#conclusion" class="btn btn-secondary hover:btn-primary">
+            Conclusion
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Section Analyse : Graphique 1 -->
   <section id="croisement" class="relative py-24 px-6 bg-base-100">
     <div
-      class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
+      class="max-w-[75vw] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
     >
       <!-- Graphique -->
       <div class="relative">
@@ -126,7 +141,7 @@ import Graph1 from "../components/Graph1.astro";
             </div>
           </div>
           <div class="p-4">
-            <Graph1 />
+            <Graph9 />
           </div>
         </div>
       </div>
@@ -137,7 +152,7 @@ import Graph1 from "../components/Graph1.astro";
           <div class="w-2.5 h-2.5 rounded-full bg-primary"></div>
           <div class="w-2.5 h-2.5 rounded-full bg-secondary"></div>
           <span class="text-sm opacity-60"
-            >Étape — Patrimoine & Événementiel</span
+            >Étape 1— Patrimoine & Événementiel</span
           >
         </div>
 
@@ -168,6 +183,23 @@ import Graph1 from "../components/Graph1.astro";
           croisement aide à repérer les régions qui activent fortement leur
           capital patrimonial et celles où un potentiel reste sous-exploité.
         </p>
+        <div class="divider my-2">Bases de données utilisées</div>
+        <ul class="space-y-3">
+          <li>
+            <a
+              href="https://data.culture.gouv.fr/explore/dataset/base-des-lieux-et-des-equipements-culturels/information/?disjunctive.sous_domaine&disjunctive.region&disjunctive.type_equipement_ou_lieu&disjunctive.domaine&disjunctive.label_et_appellation&disjunctive.departement&disjunctive.precision_equipement"
+              rel="noopener noreferrer"
+              class="text-blue-500 hover:text-blue-700 hover:underline transition font-medium"
+              >Lien vers la base des lieux et équipements culturels</a
+            ><br />
+            <a
+              href="https://www.data.gouv.fr/datasets/liste-des-festivals-en-france/"
+              rel="noopener noreferrer"
+              class="text-blue-500 hover:text-blue-700 hover:underline transition font-medium"
+              >Lien vers la liste des festivals en France</a
+            >
+          </li>
+        </ul>
       </aside>
     </div>
   </section>
@@ -199,7 +231,7 @@ import Graph1 from "../components/Graph1.astro";
         <h2
           class="text-5xl lg:text-6xl font-bold text-base-content leading-tight"
         >
-          Activer le patrimoine pour une culture vivante
+          Le patrimoine historique comme avantage pour la vitalité culturelle
         </h2>
       </div>
 
@@ -244,97 +276,97 @@ import Graph1 from "../components/Graph1.astro";
               accompagnement des équipes).
             </p>
           </div>
-        </div>
 
-        <div
-          class="bg-base-300 bg-opacity-50 rounded-2xl p-8 border border-primary/20"
-        >
-          <h3 class="text-2xl font-bold text-base-content mb-4">À retenir</h3>
-          <p class="text-base-content opacity-90">
-            Le patrimoine peut être un moteur puissant, mais la culture vivante
-            se construit surtout par des politiques actives, des acteurs
-            présents et des moyens pérennes. Repérer les écarts entre “stock”
-            patrimonial et vitalité événementielle permet d’orienter les
-            investissements là où ils produisent le plus d’effets.
-          </p>
-        </div>
-      </div>
-
-      <div class="flex justify-center mt-12 pt-8 border-t border-base-300">
-        <a href="/" class="btn btn-primary btn-lg gap-2">
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <div
+            class="bg-base-300 bg-opacity-50 rounded-2xl p-8 border border-primary/20"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-            ></path>
-          </svg>
-          Retour au sommaire
-        </a>
+            <h3 class="text-2xl font-bold text-base-content mb-4">À retenir</h3>
+            <p class="text-base-content opacity-90">
+              Le patrimoine peut être un moteur puissant, mais la culture
+              vivante se construit surtout par des politiques actives, des
+              acteurs présents et des moyens pérennes. Repérer les écarts entre
+              “stock” patrimonial et vitalité événementielle permet d’orienter
+              les investissements là où ils produisent le plus d’effets.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex justify-center mt-12 pt-8 border-t border-base-300">
+          <a href="/" class="btn btn-primary btn-lg gap-2">
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+              ></path>
+            </svg>
+            Retour au sommaire
+          </a>
+        </div>
       </div>
-    </div>
 
-    <script>
-      // Affichage du menu latéral + lien actif
-      document.addEventListener("DOMContentLoaded", () => {
-        const graphNav = document.getElementById("graphNav");
-        const firstSection = document.getElementById("croisement");
-        const lastSection = document.getElementById("conclusion");
-        const navLinks = document.querySelectorAll(".nav-link");
-        const sections = ["croisement", "conclusion"];
+      <script>
+        // Affichage du menu latéral + lien actif
+        document.addEventListener("DOMContentLoaded", () => {
+          const graphNav = document.getElementById("graphNav");
+          const firstSection = document.getElementById("croisement");
+          const lastSection = document.getElementById("conclusion");
+          const navLinks = document.querySelectorAll(".nav-link");
+          const sections = ["croisement", "conclusion"];
 
-        if (graphNav && firstSection && lastSection) {
-          graphNav.style.opacity = "0";
-          graphNav.style.pointerEvents = "none";
-          graphNav.style.transition = "opacity 0.3s ease-in-out";
+          if (graphNav && firstSection && lastSection) {
+            graphNav.style.opacity = "0";
+            graphNav.style.pointerEvents = "none";
+            graphNav.style.transition = "opacity 0.3s ease-in-out";
 
-          const updateActiveLink = () => {
-            let activeSection = null;
-            for (const id of sections) {
-              const el = document.getElementById(id);
-              if (el) {
-                const r = el.getBoundingClientRect();
-                if (r.top <= 200 && r.bottom > 200) {
-                  activeSection = id;
-                  break;
+            const updateActiveLink = () => {
+              let activeSection = null;
+              for (const id of sections) {
+                const el = document.getElementById(id);
+                if (el) {
+                  const r = el.getBoundingClientRect();
+                  if (r.top <= 200 && r.bottom > 200) {
+                    activeSection = id;
+                    break;
+                  }
                 }
               }
-            }
-            navLinks.forEach((link) => {
-              const linkSection = link.getAttribute("data-section");
-              if (linkSection === activeSection) {
-                link.classList.remove("btn-ghost");
-                link.classList.add("btn-primary");
+              navLinks.forEach((link) => {
+                const linkSection = link.getAttribute("data-section");
+                if (linkSection === activeSection) {
+                  link.classList.remove("btn-ghost");
+                  link.classList.add("btn-primary");
+                } else {
+                  link.classList.remove("btn-primary");
+                  link.classList.add("btn-ghost");
+                }
+              });
+            };
+
+            const checkVisibility = () => {
+              const f = firstSection.getBoundingClientRect();
+              const l = lastSection.getBoundingClientRect();
+              if (f.top <= 100 && l.bottom > 0) {
+                graphNav.style.opacity = "1";
+                graphNav.style.pointerEvents = "auto";
               } else {
-                link.classList.remove("btn-primary");
-                link.classList.add("btn-ghost");
+                graphNav.style.opacity = "0";
+                graphNav.style.pointerEvents = "none";
               }
-            });
-          };
+              updateActiveLink();
+            };
 
-          const checkVisibility = () => {
-            const f = firstSection.getBoundingClientRect();
-            const l = lastSection.getBoundingClientRect();
-            if (f.top <= 100 && l.bottom > 0) {
-              graphNav.style.opacity = "1";
-              graphNav.style.pointerEvents = "auto";
-            } else {
-              graphNav.style.opacity = "0";
-              graphNav.style.pointerEvents = "none";
-            }
-            updateActiveLink();
-          };
-
-          window.addEventListener("scroll", checkVisibility);
-          checkVisibility();
-        }
-      });
-    </script>
+            window.addEventListener("scroll", checkVisibility);
+            checkVisibility();
+          }
+        });
+      </script>
+    </div>
   </section>
 </Layout>
