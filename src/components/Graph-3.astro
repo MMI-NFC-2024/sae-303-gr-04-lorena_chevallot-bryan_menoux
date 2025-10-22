@@ -77,24 +77,28 @@ const top10 = d3.sort(dataOk, (d: any) => -d.LieuxParHabitant).slice(0, 10);
 const bottom10 = d3.sort(dataOk, (d: any) => d.LieuxParHabitant).slice(0, 10);
 const top10Json = JSON.stringify(top10);
 const bottom10Json = JSON.stringify(bottom10);
+
+const uniqueId = `graph-3-${Math.random().toString(36).substr(2, 9)}`;
 ---
 
-<div id="bar-chart-container">
-  <div
-    id="plot-holder-3"
-    class="flex justify-center min-h-[600px] items-center"
-  >
+<div class="graph-container" data-graph-id={uniqueId}>
+  <div class="plot-holder flex justify-center min-h-[600px] items-center">
     <div class="text-zinc-400">Chargement du graphique...</div>
   </div>
+  <div class="tooltip"></div>
 </div>
-<script type="module" define:vars={{ top10Json, bottom10Json }}>
+<script type="module" define:vars={{ top10Json, bottom10Json, uniqueId }}>
   (async () => {
     const Plot = await import(
       "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm"
     );
     const top10 = JSON.parse(top10Json);
     const bottom10 = JSON.parse(bottom10Json);
-    const plotHolder = document.getElementById("plot-holder-3");
+
+    const container = document.querySelector(`[data-graph-id="${uniqueId}"]`);
+    const plotHolder = container?.querySelector(".plot-holder");
+    const tooltip = container?.querySelector(".tooltip");
+
     try {
       const plot = Plot.plot({
         x: {
@@ -117,6 +121,7 @@ const bottom10Json = JSON.stringify(bottom10);
               `${d.departement_culture}\n${d.LieuxParHabitant.toFixed(
                 2
               )} / 10 000 hab.`,
+            ariaLabel: null,
           }),
           Plot.barX(top10, {
             x: "LieuxParHabitant",
@@ -126,6 +131,7 @@ const bottom10Json = JSON.stringify(bottom10);
               `${d.departement_culture}\n${d.LieuxParHabitant.toFixed(
                 2
               )} / 10 000 hab.`,
+            ariaLabel: null,
           }),
           Plot.ruleX([0]),
         ],
@@ -133,8 +139,51 @@ const bottom10Json = JSON.stringify(bottom10);
         height: 600,
         marginLeft: 180,
       });
-      plotHolder.innerHTML = "";
-      plotHolder.appendChild(plot);
+
+      if (plotHolder && tooltip) {
+        plotHolder.innerHTML = "";
+        plotHolder.appendChild(plot);
+
+        const bars = plotHolder.querySelectorAll("rect");
+
+        const barTitles = new Map();
+        bars.forEach((bar) => {
+          const titleElement = bar.querySelector("title");
+          const title = titleElement?.textContent || "";
+          barTitles.set(bar, title);
+
+          if (titleElement) {
+            titleElement.remove();
+          }
+          bar.removeAttribute("aria-label");
+        });
+
+        bars.forEach((bar) => {
+          bar.style.cursor = "pointer";
+          bar.style.transition = "all 0.2s ease";
+
+          bar.addEventListener("mouseenter", (e) => {
+            const title = barTitles.get(bar);
+
+            tooltip.textContent = title;
+            tooltip.style.display = "block";
+            tooltip.style.left = e.clientX + 10 + "px";
+            tooltip.style.top = e.clientY + 10 + "px";
+
+            bar.style.filter = "brightness(1.15)";
+          });
+
+          bar.addEventListener("mousemove", (e) => {
+            tooltip.style.left = e.clientX + 10 + "px";
+            tooltip.style.top = e.clientY + 10 + "px";
+          });
+
+          bar.addEventListener("mouseleave", () => {
+            tooltip.style.display = "none";
+            bar.style.filter = "none";
+          });
+        });
+      }
     } catch (err) {
       console.error("Erreur:", err);
       plotHolder.innerHTML =
@@ -143,11 +192,33 @@ const bottom10Json = JSON.stringify(bottom10);
   })();
 </script>
 <style>
-  #bar-chart-container {
+  .graph-container {
+    position: relative;
     width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 1rem;
+  }
+
+  .tooltip {
+    position: fixed;
+    display: none;
+    background: rgba(0, 0, 0, 0.95);
+    color: white;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+    white-space: pre-line;
+    line-height: 1.6;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 1000;
   }
 </style>

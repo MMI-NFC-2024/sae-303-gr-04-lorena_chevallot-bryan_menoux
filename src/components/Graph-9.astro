@@ -1,35 +1,25 @@
 ---
-// Graph-9: Croisement entre richesse patrimoniale et offre événementielle (festivals)
 import { readFile } from "node:fs/promises";
 import * as d3 from "d3";
-
-// Charger les données côté serveur
 const baseCulturelleText = await readFile(
   "./src/assets/base_culturelle_nettoyee.csv",
   "utf-8"
 );
-
-// Parser avec point-virgule d'abord, sinon virgule
 let patrimoine = d3.dsvFormat(";").parse(baseCulturelleText);
 if (Object.keys(patrimoine[0]).length === 1) {
   patrimoine = d3.dsvFormat(",").parse(baseCulturelleText);
 }
-
 const festivalsText = await readFile(
   "./src/assets/festivals-global-festivals-pl.csv",
   "utf-8"
 );
 const festivalsData = d3.dsvFormat(";").parse(festivalsText);
-
-// Trouver les colonnes dynamiquement
 const keyType =
   Object.keys(patrimoine[0]).find((k) => k.toLowerCase().includes("type")) ??
   "Type équipement ou lieu";
 const keyRegion =
   Object.keys(patrimoine[0]).find((k) => k.toLowerCase().includes("région")) ??
   "Région";
-
-// Filtrer les monuments
 const monuments = patrimoine.filter(
   (d) => d[keyType]?.trim() === "Monument" && d[keyRegion]
 );
@@ -39,7 +29,6 @@ const monumentsParRegion = d3.rollup(
   (d) => d[keyRegion]?.trim() ?? ""
 );
 
-// Mapping département -> région
 const depToRegion = new Map([
   ["01", "Auvergne-Rhône-Alpes"],
   ["03", "Auvergne-Rhône-Alpes"],
@@ -144,7 +133,6 @@ const depToRegion = new Map([
   ["976", "Mayotte"],
 ]);
 
-// Fonction de normalisation des codes départements
 function normalizeCode(c: any): string | null {
   if (!c) return null;
   let code = String(c).trim();
@@ -155,7 +143,6 @@ function normalizeCode(c: any): string | null {
   return null;
 }
 
-// Compter les festivals par région
 const festivalsParRegion = d3.rollup(
   festivalsData,
   (v) => v.length,
@@ -171,7 +158,6 @@ const festivalsParRegion = d3.rollup(
   }
 );
 
-// Fusionner les données
 const allRegions = new Set([
   ...monumentsParRegion.keys(),
   ...festivalsParRegion.keys(),
@@ -190,14 +176,15 @@ const fusion = Array.from(allRegions)
 
 const maxValue = d3.max(fusion, (d) => Math.max(d.monuments, d.festivals)) || 0;
 
-// Sérialiser pour le client
 const fusionJson = JSON.stringify(fusion);
 const maxValueJson = JSON.stringify(maxValue);
+
+const uniqueId = `graph-9-${Math.random().toString(36).substr(2, 9)}`;
 ---
 
-<div class="graph-container">
-  <div id="plot-holder-9"></div>
-  <div id="tooltip-9" class="tooltip"></div>
+<div class="graph-container" data-graph-id={uniqueId}>
+  <div class="plot-holder"></div>
+  <div class="tooltip"></div>
 </div>
 
 <style>
@@ -210,48 +197,54 @@ const maxValueJson = JSON.stringify(maxValue);
     padding: 2rem 0;
   }
 
-  #plot-holder-9 {
+  .plot-holder {
     width: 100%;
     max-width: 1000px;
   }
 
   .tooltip {
-    position: absolute;
+    position: fixed;
     display: none;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid #ccc;
+    background: rgba(0, 0, 0, 0.95);
+    color: white;
+    padding: 10px 14px;
     border-radius: 6px;
-    padding: 10px;
-    font-size: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     pointer-events: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
     white-space: pre-line;
-    line-height: 1.5;
+    line-height: 1.6;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 1000;
   }
 
-  :global(#plot-holder-9 svg) {
+  :global(.graph-container .plot-holder svg) {
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
   }
 
-  :global(#plot-holder-9 text) {
+  :global(.graph-container .plot-holder text) {
     pointer-events: none;
   }
 
-  :global(#plot-holder-9 rect) {
+  :global(.graph-container .plot-holder rect) {
     cursor: pointer;
     transition: all 0.2s ease;
   }
 
-  :global(#plot-holder-9 rect:hover) {
+  :global(.graph-container .plot-holder rect:hover) {
     filter: brightness(1.15);
   }
 </style>
 
-<script type="module" define:vars={{ fusionJson, maxValueJson }}>
+<script type="module" define:vars={{ fusionJson, maxValueJson, uniqueId }}>
   async function renderPlot() {
     try {
       const Plot = await import(
@@ -316,31 +309,28 @@ const maxValueJson = JSON.stringify(maxValue);
         ],
       });
 
-      const plotHolder = document.getElementById("plot-holder-9");
-      const tooltip = document.getElementById("tooltip-9");
+      const container = document.querySelector(`[data-graph-id="${uniqueId}"]`);
+      const plotHolder = container?.querySelector(".plot-holder");
+      const tooltip = container?.querySelector(".tooltip");
 
       if (plotHolder && tooltip) {
         plotHolder.innerHTML = "";
         plotHolder.appendChild(plot);
 
-        // Récupérer toutes les barres
         const bars = plotHolder.querySelectorAll("rect");
 
-        // Créer une map pour stocker les titres
         const barTitles = new Map();
         bars.forEach((bar) => {
           const titleElement = bar.querySelector("title");
           const title = titleElement?.textContent || "";
           barTitles.set(bar, title);
 
-          // Supprimer le tooltip natif
           if (titleElement) {
             titleElement.remove();
           }
           bar.removeAttribute("aria-label");
         });
 
-        // Ajouter l'interactivité
         bars.forEach((bar) => {
           bar.style.cursor = "pointer";
 
@@ -349,13 +339,13 @@ const maxValueJson = JSON.stringify(maxValue);
 
             tooltip.textContent = title;
             tooltip.style.display = "block";
-            tooltip.style.left = e.pageX + 10 + "px";
-            tooltip.style.top = e.pageY + 10 + "px";
+            tooltip.style.left = e.clientX + 10 + "px";
+            tooltip.style.top = e.clientY + 10 + "px";
           });
 
           bar.addEventListener("mousemove", (e) => {
-            tooltip.style.left = e.pageX + 10 + "px";
-            tooltip.style.top = e.pageY + 10 + "px";
+            tooltip.style.left = e.clientX + 10 + "px";
+            tooltip.style.top = e.clientY + 10 + "px";
           });
 
           bar.addEventListener("mouseleave", () => {

@@ -35,19 +35,18 @@ for (const row of data) {
   }
 }
 const tidyJson = JSON.stringify(tidy);
+
+const uniqueId = `graph-6-${Math.random().toString(36).substr(2, 9)}`;
 ---
 
-<div id="map-container-6">
-  <div
-    id="plot-holder-6"
-    class="flex justify-center min-h-[400px] items-center"
-  >
+<div class="graph-container" data-graph-id={uniqueId}>
+  <div class="plot-holder flex justify-center min-h-[400px] items-center">
     <div class="text-zinc-400">Chargement du graphique...</div>
   </div>
-  <div id="tooltip-6" class="tooltip"></div>
+  <div class="tooltip"></div>
 </div>
 <style>
-  #map-container-6 {
+  .graph-container {
     position: relative;
     display: inline-block;
     width: 100%;
@@ -56,19 +55,19 @@ const tidyJson = JSON.stringify(tidy);
     -moz-user-select: none;
     -ms-user-select: none;
   }
-  #plot-holder-6 {
+  .plot-holder {
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
   }
-  #plot-holder-6 svg {
+  .plot-holder svg {
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
   }
-  #plot-holder-6 text {
+  .plot-holder text {
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -95,7 +94,7 @@ const tidyJson = JSON.stringify(tidy);
     z-index: 1000;
   }
 </style>
-<script type="module" define:vars={{ tidyJson }}>
+<script type="module" define:vars={{ tidyJson, uniqueId }}>
   const tidy = JSON.parse(tidyJson);
   async function renderPlot() {
     try {
@@ -141,8 +140,11 @@ const tidyJson = JSON.stringify(tidy);
         width: 750,
         height: 400,
       });
-      const plotHolder = document.getElementById("plot-holder-6");
-      const tooltip = document.getElementById("tooltip-6");
+
+      const container = document.querySelector(`[data-graph-id="${uniqueId}"]`);
+      const plotHolder = container?.querySelector(".plot-holder");
+      const tooltip = container?.querySelector(".tooltip");
+
       if (plotHolder && tooltip) {
         plotHolder.innerHTML = "";
         plotHolder.appendChild(heatmap);
@@ -166,16 +168,16 @@ const tidyJson = JSON.stringify(tidy);
             const title = cellTitles.get(cell);
             tooltip.textContent = title;
             tooltip.style.display = "block";
-            tooltip.style.left = e.pageX + 10 + "px";
-            tooltip.style.top = e.pageY + 10 + "px";
+            tooltip.style.left = e.clientX + 10 + "px";
+            tooltip.style.top = e.clientY + 10 + "px";
             currentHighlightedCell = cell;
             cell.style.stroke = "#2563eb";
             cell.style.filter = "brightness(1.15) saturate(1.2)";
             cell.style.opacity = "0.9";
           });
           cell.addEventListener("mousemove", (e) => {
-            tooltip.style.left = e.pageX + 10 + "px";
-            tooltip.style.top = e.pageY + 10 + "px";
+            tooltip.style.left = e.clientX + 10 + "px";
+            tooltip.style.top = e.clientY + 10 + "px";
           });
           cell.addEventListener("mouseleave", (e) => {
             const relatedTarget = e.relatedTarget;

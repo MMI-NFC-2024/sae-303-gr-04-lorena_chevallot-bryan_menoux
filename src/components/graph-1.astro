@@ -36,23 +36,31 @@ const deptData = departements.features.map((feature: any) => {
 });
 const deptDataJson = JSON.stringify(deptData);
 const departatementsJson = JSON.stringify(departements);
+
+const uniqueId = `graph-1-${Math.random().toString(36).substr(2, 9)}`;
 ---
 
-<div id="map-container">
-  <div id="plot-holder" class="flex justify-center min-h-[600px] items-center">
+<div class="graph-container" data-graph-id={uniqueId}>
+  <div class="plot-holder flex justify-center min-h-[600px] items-center">
     <div class="text-zinc-400">Chargement de la carte...</div>
   </div>
-  <div id="tooltip" class="tooltip"></div>
+  <div class="tooltip"></div>
 </div>
-<script type="module" define:vars={{ deptDataJson, departatementsJson }}>
+<script
+  type="module"
+  define:vars={{ deptDataJson, departatementsJson, uniqueId }}
+>
   (async () => {
     const Plot = await import(
       "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm"
     );
     const deptData = JSON.parse(deptDataJson);
     const departements = JSON.parse(departatementsJson);
-    const tooltip = document.getElementById("tooltip");
-    const plotHolder = document.getElementById("plot-holder");
+
+    const container = document.querySelector(`[data-graph-id="${uniqueId}"]`);
+    const tooltip = container?.querySelector(".tooltip");
+    const plotHolder = container?.querySelector(".plot-holder");
+
     try {
       const plot = Plot.plot({
         projection: {
@@ -85,6 +93,7 @@ const departatementsJson = JSON.stringify(departements);
                 ? `${deptInfo.nom}\n${deptInfo.count} lieu${deptInfo.count > 1 ? "x" : ""}`
                 : "Données indisponibles";
             },
+            ariaLabel: null,
           }),
         ],
         width: 800,
@@ -93,26 +102,34 @@ const departatementsJson = JSON.stringify(departements);
       });
       plotHolder.innerHTML = "";
       plotHolder.appendChild(plot);
+
       const paths = plotHolder.querySelectorAll("path");
       paths.forEach((path) => {
+        const title =
+          path.getAttribute("aria-label") ||
+          path.querySelector("title")?.textContent ||
+          "";
+
+        const titleElement = path.querySelector("title");
+        if (titleElement) {
+          titleElement.remove();
+        }
+        path.removeAttribute("aria-label");
+
         path.style.cursor = "pointer";
         path.style.transition = "all 0.2s ease";
         path.addEventListener("mouseenter", (e) => {
-          const title =
-            path.getAttribute("aria-label") ||
-            path.querySelector("title")?.textContent ||
-            "";
           tooltip.textContent = title;
           tooltip.style.display = "block";
-          tooltip.style.left = e.pageX + 10 + "px";
-          tooltip.style.top = e.pageY + 10 + "px";
+          tooltip.style.left = e.clientX + 10 + "px";
+          tooltip.style.top = e.clientY + 10 + "px";
           path.style.stroke = "#2563eb";
           path.style.filter = "brightness(1.15) saturate(1.2)";
           path.style.opacity = "0.9";
         });
         path.addEventListener("mousemove", (e) => {
-          tooltip.style.left = e.pageX + 10 + "px";
-          tooltip.style.top = e.pageY + 10 + "px";
+          tooltip.style.left = e.clientX + 10 + "px";
+          tooltip.style.top = e.clientY + 10 + "px";
         });
         path.addEventListener("mouseleave", () => {
           tooltip.style.display = "none";

@@ -92,6 +92,7 @@ const typesEquipementsJson = JSON.stringify(typesEquipements);
               fillOpacity: fillOpacity,
               stroke: "none",
               title: (d) => `${d["Nom"]}\n${d["libelle_geographique"]}`,
+              ariaLabel: null,
             }),
             Plot.text(grandesVilles, {
               x: "lon",
@@ -111,6 +112,15 @@ const typesEquipementsJson = JSON.stringify(typesEquipements);
         });
         plotHolder.innerHTML = "";
         plotHolder.appendChild(plot);
+
+        const circles = plotHolder.querySelectorAll("circle");
+        circles.forEach((circle) => {
+          const titleElement = circle.querySelector("title");
+          if (titleElement) {
+            titleElement.remove();
+          }
+          circle.removeAttribute("aria-label");
+        });
       } catch (err) {
         console.error("Erreur:", err);
         plotHolder.innerHTML =

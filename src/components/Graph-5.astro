@@ -93,25 +93,27 @@ france.features.forEach((f: any) => {
   f.properties.pourcentage_visites = d?.pourcentage ?? null;
 });
 const franceJson = JSON.stringify(france);
+
+const uniqueId = `graph-5-${Math.random().toString(36).substr(2, 9)}`;
 ---
 
-<div id="double-map-container">
-  <div
-    id="plot-holder-5"
-    class="flex justify-center min-h-[540px] items-center"
-  >
+<div class="graph-container" data-graph-id={uniqueId}>
+  <div class="plot-holder flex justify-center min-h-[540px] items-center">
     <div class="text-zinc-400">Chargement des cartes...</div>
   </div>
-  <div id="tooltip-5" class="tooltip"></div>
+  <div class="tooltip"></div>
 </div>
-<script type="module" define:vars={{ franceJson }}>
+<script type="module" define:vars={{ franceJson, uniqueId }}>
   (async () => {
     const Plot = await import(
       "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm"
     );
     const france = JSON.parse(franceJson);
-    const plotHolder = document.getElementById("plot-holder-5");
-    const tooltip = document.getElementById("tooltip-5");
+
+    const container = document.querySelector(`[data-graph-id="${uniqueId}"]`);
+    const plotHolder = container?.querySelector(".plot-holder");
+    const tooltip = container?.querySelector(".tooltip");
+
     try {
       const width = 460;
       const height = 540;
@@ -129,6 +131,7 @@ const franceJson = JSON.stringify(france);
                   ? d.properties.taux_pauvrete + " %"
                   : "Aucune donnée"
               }`,
+            ariaLabel: null,
           }),
         ],
         width,
@@ -156,6 +159,7 @@ const franceJson = JSON.stringify(france);
                   ? d.properties.pourcentage_visites.toFixed(2) + " %"
                   : "Aucune donnée"
               }`,
+            ariaLabel: null,
           }),
         ],
         width,
@@ -172,27 +176,35 @@ const franceJson = JSON.stringify(france);
       container.appendChild(mapCulture);
       plotHolder.innerHTML = "";
       plotHolder.appendChild(container);
+
       const paths = plotHolder.querySelectorAll("path");
       paths.forEach((path) => {
+        const title =
+          path.getAttribute("aria-label") ||
+          path.querySelector("title")?.textContent ||
+          "";
+
+        const titleElement = path.querySelector("title");
+        if (titleElement) {
+          titleElement.remove();
+        }
+        path.removeAttribute("aria-label");
+
         path.style.cursor = "pointer";
         path.style.transition = "all 0.2s ease";
         path.addEventListener("mouseenter", (e) => {
-          const title =
-            path.getAttribute("aria-label") ||
-            path.querySelector("title")?.textContent ||
-            "";
           tooltip.textContent = title;
           tooltip.style.display = "block";
-          tooltip.style.left = e.pageX + 10 + "px";
-          tooltip.style.top = e.pageY + 10 + "px";
+          tooltip.style.left = e.clientX + 10 + "px";
+          tooltip.style.top = e.clientY + 10 + "px";
           path.style.stroke = "#2563eb";
           path.style.strokeWidth = "2";
           path.style.filter = "brightness(1.15) saturate(1.2)";
           path.style.opacity = "0.9";
         });
         path.addEventListener("mousemove", (e) => {
-          tooltip.style.left = e.pageX + 10 + "px";
-          tooltip.style.top = e.pageY + 10 + "px";
+          tooltip.style.left = e.clientX + 10 + "px";
+          tooltip.style.top = e.clientY + 10 + "px";
         });
         path.addEventListener("mouseleave", () => {
           tooltip.style.display = "none";
