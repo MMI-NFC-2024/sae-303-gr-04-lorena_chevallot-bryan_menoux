@@ -1,0 +1,244 @@
+---
+import * as d3 from "d3";
+import fs from "fs";
+import path from "path";
+const assetsDir = path.join(process.cwd(), "src", "assets");
+const entreesMuseeText = fs.readFileSync(
+  path.join(assetsDir, "ENTREES_ET_CATEGORIES_DE_PUBLIC@2.csv"),
+  "utf8"
+);
+const musees = d3.csvParse(entreesMuseeText);
+const indicePauvreteText = fs.readFileSync(
+  path.join(assetsDir, "indice-pauvrete-21@1.csv"),
+  "utf8"
+);
+const indicePauvrete = d3.csvParse(indicePauvreteText);
+const populationText = fs.readFileSync(
+  path.join(assetsDir, "detail_population@2.json"),
+  "utf8"
+);
+const population = JSON.parse(populationText);
+const geoText = fs.readFileSync(
+  path.join(assetsDir, "departements.geojson"),
+  "utf8"
+);
+const france = JSON.parse(geoText);
+const normalizeCode = (code: any) => {
+  if (code == null) return null;
+  let c = String(code).trim().replace(".0", "");
+  if (c === "2A" || c === "2B") return c;
+  if (/^\d+$/.test(c) && c.length === 1) c = "0" + c;
+  return c;
+};
+const altCorse = (code: string) =>
+  code === "2A" || code === "2B" ? "20" : code;
+const populationFiltre = population.filter(
+  (d: any) =>
+    d["Niveau Géo"] === "Département" &&
+    String(d["Âge"] || "").trim() === "Total" &&
+    String(d["Sexe"] || "").trim() === "Total" &&
+    String(d["Mesure du recensement "] || "").trim() === "Population"
+);
+const popByCode = d3.group(populationFiltre, (d: any) =>
+  normalizeCode(d["Département"] ?? d["Code géographique"])
+);
+const popMap = new Map(
+  Array.from(popByCode, ([code, rows]: any) => {
+    if (!code) return null;
+    const maxPeriode = d3.max(rows, (r: any) => +r["Période"]);
+    const val = d3.sum(
+      rows.filter((r: any) => +r["Période"] === maxPeriode),
+      (r: any) => +r["Valeur"]
+    );
+    return [code, val || null];
+  }).filter(Boolean) as any
+);
+const pauvMap = new Map(
+  indicePauvrete.map((d: any) => [
+    normalizeCode(d.code_departement),
+    +d.taux_pauvrete,
+  ])
+);
+const museeMap = new Map();
+musees.forEach((d: any) => {
+  const code = normalizeCode(d.code_departement);
+  if (!code) return;
+  const payant = +d.payant || 0;
+  const gratuit = +d.gratuit || 0;
+  const total = payant + gratuit;
+  museeMap.set(code, (museeMap.get(code) || 0) + total);
+});
+const dataFinale = france.features.map((f: any) => {
+  const code = normalizeCode(f.properties.code);
+  const pop = code
+    ? (popMap.get(code) ?? popMap.get(altCorse(code)) ?? null)
+    : null;
+  const entrees = code
+    ? (museeMap.get(code) ?? museeMap.get(altCorse(code)) ?? 0)
+    : 0;
+  const pauvrete = code
+    ? (pauvMap.get(code) ?? pauvMap.get(altCorse(code)) ?? null)
+    : null;
+
+  const ratio_pour_10k =
+    pop && typeof pop === "number" ? (entrees / pop) * 10000 : null;
+  const pourcentage = ratio_pour_10k != null ? ratio_pour_10k / 100 : null;
+
+  return { code, nom: f.properties.nom, pauvrete, pourcentage };
+});
+france.features.forEach((f: any) => {
+  const code = normalizeCode(f.properties.code);
+  const d = dataFinale.find((x: any) => x.code === code);
+  f.properties.taux_pauvrete = d?.pauvrete ?? null;
+  f.properties.pourcentage_visites = d?.pourcentage ?? null;
+});
+const franceJson = JSON.stringify(france);
+---
+
+<div id="double-map-container">
+  <div
+    id="plot-holder-5"
+    class="flex justify-center min-h-[540px] items-center"
+  >
+    <div class="text-zinc-400">Chargement des cartes...</div>
+  </div>
+  <div id="tooltip-5" class="tooltip"></div>
+</div>
+<script type="module" define:vars={{ franceJson }}>
+  (async () => {
+    const Plot = await import(
+      "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm"
+    );
+    const france = JSON.parse(franceJson);
+    const plotHolder = document.getElementById("plot-holder-5");
+    const tooltip = document.getElementById("tooltip-5");
+    try {
+      const width = 460;
+      const height = 540;
+      const mapPauvrete = Plot.plot({
+        title: "Taux de pauvreté (%) par département",
+        projection: { type: "mercator", domain: france },
+        color: { scheme: "Reds", label: "Taux de pauvreté (%)" },
+        marks: [
+          Plot.geo(france, {
+            fill: (d) => d.properties.taux_pauvrete,
+            stroke: "#fff",
+            title: (d) =>
+              `${d.properties.nom}\n${
+                d.properties.taux_pauvrete != null
+                  ? d.properties.taux_pauvrete + " %"
+                  : "Aucune donnée"
+              }`,
+          }),
+        ],
+        width,
+        height,
+        margin: 0,
+      });
+      const mapCulture = Plot.plot({
+        title: "Part estimée de la population ayant visité un musée (%)",
+        projection: { type: "mercator", domain: france },
+        color: {
+          scheme: "YlGnBu",
+          label: "% d'habitants",
+          domain: [0, 100],
+        },
+        marks: [
+          Plot.geo(france, {
+            fill: (d) => {
+              const v = d.properties.pourcentage_visites;
+              return v == null ? 0 : Math.max(0, Math.min(100, v));
+            },
+            stroke: "#fff",
+            title: (d) =>
+              `${d.properties.nom}\n${
+                d.properties.pourcentage_visites != null
+                  ? d.properties.pourcentage_visites.toFixed(2) + " %"
+                  : "Aucune donnée"
+              }`,
+          }),
+        ],
+        width,
+        height,
+        margin: 0,
+      });
+      const container = document.createElement("div");
+      container.style.display = "flex";
+      container.style.gap = "2rem";
+      container.style.justifyContent = "center";
+      container.style.alignItems = "center";
+      container.style.flexWrap = "wrap";
+      container.appendChild(mapPauvrete);
+      container.appendChild(mapCulture);
+      plotHolder.innerHTML = "";
+      plotHolder.appendChild(container);
+      const paths = plotHolder.querySelectorAll("path");
+      paths.forEach((path) => {
+        path.style.cursor = "pointer";
+        path.style.transition = "all 0.2s ease";
+        path.addEventListener("mouseenter", (e) => {
+          const title =
+            path.getAttribute("aria-label") ||
+            path.querySelector("title")?.textContent ||
+            "";
+          tooltip.textContent = title;
+          tooltip.style.display = "block";
+          tooltip.style.left = e.pageX + 10 + "px";
+          tooltip.style.top = e.pageY + 10 + "px";
+          path.style.stroke = "#2563eb";
+          path.style.strokeWidth = "2";
+          path.style.filter = "brightness(1.15) saturate(1.2)";
+          path.style.opacity = "0.9";
+        });
+        path.addEventListener("mousemove", (e) => {
+          tooltip.style.left = e.pageX + 10 + "px";
+          tooltip.style.top = e.pageY + 10 + "px";
+        });
+        path.addEventListener("mouseleave", () => {
+          tooltip.style.display = "none";
+          path.style.stroke = "#fff";
+          path.style.strokeWidth = "1";
+          path.style.filter = "none";
+          path.style.opacity = "1";
+        });
+      });
+    } catch (err) {
+      console.error("Erreur:", err);
+      plotHolder.innerHTML =
+        '<div class="text-red-400">Erreur de chargement des cartes</div>';
+    }
+  })();
+</script>
+<style>
+  #double-map-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+  }
+  #plot-holder-5 {
+    width: 100%;
+  }
+  .tooltip {
+    display: none;
+    position: fixed;
+    background: rgba(0, 0, 0, 0.95);
+    color: white;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+    white-space: pre-line;
+    line-height: 1.6;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 1000;
+  }
+</style>
